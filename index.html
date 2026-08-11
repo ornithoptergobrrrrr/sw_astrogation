@@ -157,7 +157,6 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(10px, -50%);
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.7em;
     text-transform: uppercase;
@@ -166,6 +165,7 @@
     text-shadow: 1px 1px 3px #000, 0 0 5px rgba(0,0,0,0.8);
     transition: opacity 0.2s ease;
     white-space: nowrap;
+    /* Transform is now applied dynamically in JS to prevent overlaps */
   }
   .hidden-label {
     opacity: 0 !important;
@@ -392,6 +392,8 @@ function getPlanetOffset(planetName) {
 
 function drawGridOverlay() {
   document.querySelectorAll('.planet-marker, .persistent-label').forEach(e => e.remove());
+  
+  const placedLabels = []; // Array to track drawn labels and prevent overlap
 
   planets.forEach(p => {
     const cell = document.getElementById(`cell-${p.x}-${p.y}`);
@@ -419,7 +421,50 @@ function drawGridOverlay() {
       label.innerText = p.name;
       label.style.marginLeft = `${offset.dx}px`;
       label.style.marginTop = `${offset.dy}px`;
+      
+      // Default transform assignment
+      label.style.transform = `translate(10px, -50%)`;
       cell.appendChild(label);
+      
+      // --- COLLISION AVOIDANCE LOGIC ---
+      let rect = label.getBoundingClientRect();
+      let step = 0;
+      let nudgeY = 0;
+      let flipX = false;
+      
+      const hasCollision = (r1) => {
+        const pad = 2; // Pixel buffer between labels
+        return placedLabels.some(r2 => {
+          return !(r1.right + pad <= r2.left || 
+                   r1.left - pad >= r2.right || 
+                   r1.bottom + pad <= r2.top || 
+                   r1.top - pad >= r2.bottom);
+        });
+      };
+      
+      // Attempt up to 12 different placement positions if colliding
+      while (hasCollision(rect) && step < 12) {
+        step++;
+        if (step < 4) {
+          nudgeY += 10; // Nudge down on the right
+        } else if (step === 4) {
+          flipX = true; // Flip to the left side
+          nudgeY = 0;
+        } else if (step < 8) {
+          nudgeY += 10; // Nudge down on the left
+        } else if (step === 8) {
+          flipX = false; // Back to right side
+          nudgeY = -12; // Start nudging up instead
+        } else {
+          nudgeY -= 10; // Nudge higher up
+        }
+        
+        const xTransform = flipX ? `calc(-100% - 10px)` : `10px`;
+        label.style.transform = `translate(${xTransform}, calc(-50% + ${nudgeY}px))`;
+        rect = label.getBoundingClientRect(); // Remeasure
+      }
+      
+      placedLabels.push(rect);
     }
 
     // Hover Handlers
@@ -464,13 +509,31 @@ function showTooltip(e, planet) {
     <div style="color: var(--accent); font-size: 0.75em; margin-top: 4px;">[Click to assign route]</div>
   `;
   tt.style.display = 'block';
-  moveTooltip(e);
+  moveTooltip(e); // Trigger immediately to size/position correctly
 }
 
 function moveTooltip(e) {
   const tt = document.getElementById('tooltip');
-  tt.style.left = (e.clientX + 15) + 'px';
-  tt.style.top = (e.clientY + 15) + 'px';
+  const ttRect = tt.getBoundingClientRect();
+  
+  let x = e.clientX + 15;
+  let y = e.clientY + 15;
+
+  // Viewport edge collision detection
+  if (x + ttRect.width > window.innerWidth) {
+    x = e.clientX - ttRect.width - 15; // Flip to left side of cursor
+  }
+  
+  if (y + ttRect.height > window.innerHeight) {
+    y = e.clientY - ttRect.height - 15; // Flip to top side of cursor
+  }
+  
+  // Safe bounds check to prevent it getting trapped offscreen entirely
+  x = Math.max(5, x);
+  y = Math.max(5, y);
+
+  tt.style.left = x + 'px';
+  tt.style.top = y + 'px';
 }
 
 function hideTooltip() {
