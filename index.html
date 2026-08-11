@@ -76,6 +76,45 @@
     border-radius: 4px;
     position: relative;
   }
+  .collapsible-header {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #8b949e;
+    margin: -15px -15px 0 -15px;
+    padding: 15px;
+    background: rgba(255,255,255,0.01);
+    border-radius: 4px 4px 0 0;
+    transition: background 0.2s, color 0.2s;
+  }
+  .collapsible-header:hover {
+    background: rgba(88, 166, 255, 0.05);
+    color: var(--accent);
+  }
+  .collapsible-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, margin-top 0.3s ease-out;
+    margin-top: 0;
+  }
+  .control-group.expanded .collapsible-content {
+    max-height: 300px;
+    margin-top: 8px;
+  }
+  .arrow {
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+  }
+  .control-group.expanded .arrow {
+    transform: rotate(90deg);
+  }
   label { font-weight: bold; font-size: 0.9em; color: #8b949e; }
   input[type="text"], input[type="number"], select, button {
     background: #0d1117;
@@ -279,18 +318,23 @@
 <div class="panel controls">
   <h2>Astrogation Systems</h2>
 
-  <div class="control-group">
-    <label>Log System / Add Planet</label>
-    <input type="text" id="p-name" placeholder="Designation (e.g., Geonosis)" />
-    <div style="display: flex; gap: 10px;">
-      <select id="p-x" style="flex: 1;" title="Grid Column (C-U)"></select>
-      <select id="p-y" style="flex: 1;" title="Row (1-21)"></select>
+  <div class="control-group" id="log-system-group">
+    <div class="collapsible-header" onclick="toggleLogSystem()">
+      <span>Log System / Add Planet</span>
+      <span class="arrow">&#9654;</span>
     </div>
-    <div class="checkbox-row">
-      <input type="checkbox" id="p-important" />
-      <label for="p-important">Mark as Important System</label>
+    <div class="collapsible-content">
+      <input type="text" id="p-name" placeholder="Designation (e.g., Geonosis)" />
+      <div style="display: flex; gap: 10px;">
+        <select id="p-x" style="flex: 1;" title="Grid Column (C-U)"></select>
+        <select id="p-y" style="flex: 1;" title="Row (1-21)"></select>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="p-important" />
+        <label for="p-important">Mark as Important System</label>
+      </div>
+      <button onclick="addPlanet()">Commit to NavDrive</button>
     </div>
-    <button onclick="addPlanet()">Commit to NavDrive</button>
   </div>
 
   <div class="control-group">
@@ -382,6 +426,11 @@ async function init() {
   window.addEventListener('resize', () => {
     drawCanvas();
   });
+}
+
+function toggleLogSystem() {
+  const group = document.getElementById('log-system-group');
+  group.classList.toggle('expanded');
 }
 
 function refreshMapData() {
@@ -949,7 +998,6 @@ function calculateRoute() {
   const d = Math.floor(travelTimeHrs / 24);
   const h = Math.round(travelTimeHrs % 24);
 
-  // Condensed route log (showing origin, destination, and jump count instead of full intermediary steps)
   log(`> ROUTE PLOTTED: <span style="color:#fff">${p1.name}</span> &rarr; <span style="color:#fff">${p2.name}</span><br>`+
       `> TOTAL JUMP DISTANCE: ${cost.toFixed(2)} Sectors (${path.length - 1} Jumps)<br>`+
       `> HYPERDRIVE: Class ${hyperClass}<br>`+
