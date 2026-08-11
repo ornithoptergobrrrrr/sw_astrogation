@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galactic Astrogation Computer</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --text: #c9d1d9;
+    --accent: #58a6ff;
+    --grid-line: #30363d;
+    --planet: #3fb950;
+    --route: #f39c12;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+    height: 100vh;
+    box-sizing: border-box;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--grid-line);
+    border-radius: 6px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .controls {
+    flex: 1;
+    max-width: 380px;
+    overflow-y: auto;
+  }
+  .map-container {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  h2 {
+    margin-top: 0;
+    color: var(--accent);
+    border-bottom: 1px solid var(--grid-line);
+    padding-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    background: rgba(255,255,255,0.02);
+    padding: 15px;
+    border: 1px solid rgba(48, 54, 61, 0.5);
+    border-radius: 4px;
+  }
+  label { font-weight: bold; font-size: 0.9em; color: #8b949e; }
+  input[type="text"], input[type="number"], select, button {
+    background: #0d1117;
+    color: var(--text);
+    border: 1px solid var(--grid-line);
+    padding: 10px;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  button {
+    background: var(--grid-line);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  button:hover {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+    margin-bottom: 6px;
+  }
+  .checkbox-row input {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+  }
+  .checkbox-row label {
+    cursor: pointer;
+    margin: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 40px repeat(19, 1fr);
+    grid-template-rows: 40px repeat(21, 1fr);
+    flex: 1;
+    border: 1px solid var(--grid-line);
+    position: relative;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    overflow: hidden;
+  }
+  .grid-header {
+    background: #11151a;
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--grid-line);
+    border-right: 1px solid var(--grid-line);
+    color: #8b949e;
+  }
+  .cell {
+    border-right: 1px dashed rgba(48, 54, 61, 0.3);
+    border-bottom: 1px dashed rgba(48, 54, 61, 0.3);
+    position: relative;
+  }
+  .planet-marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: var(--planet);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--planet);
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.15s ease, background 0.15s;
+  }
+  .planet-marker:hover {
+    background: #fff;
+    box-shadow: 0 0 12px #fff;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+  /* Persistent Label Layer (Above Planets: z-index 20) */
+  .persistent-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(10px, -50%);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.7em;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 20;
+    text-shadow: 1px 1px 3px #000, 0 0 5px rgba(0,0,0,0.8);
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+  }
+  .hidden-label {
+    opacity: 0 !important;
+  }
+  .output {
+    background: #000;
+    padding: 15px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    min-height: 80px;
+    font-size: 0.9em;
+    line-height: 1.4;
+    box-shadow: inset 0 0 10px rgba(88, 166, 255, 0.1);
+  }
+  #route-canvas {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    pointer-events: none;
+    z-index: 5;
+  }
+  /* Floating HUD Tooltip */
+  #tooltip {
+    position: fixed;
+    display: none;
+    background: rgba(22, 27, 34, 0.95);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .tt-header {
+    color: var(--accent);
+    font-weight: bold;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(88, 166, 255, 0.3);
+    padding-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tt-item {
+    color: #ffffff;
+    margin-top: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div id="tooltip"></div>
+
+<div class="panel controls">
+  <h2>Astrogation Systems</h2>
+
+  <div class="control-group">
+    <label>Log System / Add Planet</label>
+    <input type="text" id="p-name" placeholder="Designation (e.g., Geonosis)" />
+    <div style="display: flex; gap: 10px;">
+      <select id="p-x" style="flex: 1;" title="Grid Column (C-U)"></select>
+      <select id="p-y" style="flex: 1;" title="Grid Row (1-21)"></select>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="p-important" />
+      <label for="p-important">Mark as Important System</label>
+    </div>
+    <button onclick="addPlanet()">Commit to NavDrive</button>
+  </div>
+
+  <div class="control-group">
+    <label>Hyperspace Route Plotter</label>
+    <select id="route-from"><option value="">Origin...</option></select>
+    <select id="route-to"><option value="">Destination...</option></select>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <label style="flex: 1;">Hyperdrive Class:</label>
+      <input type="number" id="h-class" value="1.0" step="0.1" min="0.1" style="flex: 1;" title="Lower is faster" />
+    </div>
+    <button onclick="calculateRoute()">Calculate Jump</button>
+  </div>
+
+  <div class="output" id="output-log">
+    > BOOT SEQUENCE INITIATED...<br>
+    > NAVICOMPUTER READY...
+  </div>
+
+  <div class="control-group" style="margin-top: auto;">
+    <label>Memory Core Management</label>
+    <button onclick="exportData()" style="margin-bottom: 5px;">Export Nav Data (.json)</button>
+    <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)" />
+    <button onclick="document.getElementById('import-file').click()">Load Nav Data (.json)</button>
+  </div>
+</div>
+
+<div class="panel map-container">
+  <h2>Galactic Grid</h2>
+  <div class="grid" id="map-grid">
+    <canvas id="route-canvas"></canvas>
+  </div>
+</div>
+
+<script>
+// Standard 19x21 Grid (C through U)
+const letters = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U'];
+
+let planets = [
+  { name: 'Coruscant', x: 'K', y: 9, important: true },
+  { name: 'Tatooine', x: 'R', y: 16, important: true },
+  { name: 'Geonosis', x: 'R', y: 16, important: false },
+  { name: 'Ryloth', x: 'R', y: 17, important: false },
+  { name: 'Hoth', x: 'K', y: 18, important: false },
+  { name: 'Endor', x: 'H', y: 16, important: false },
+  { name: 'Klatooine', x: 'S', y: 9, important: false },
+  { name: 'Ord Mantell', x: 'L', y: 7, important: true },
+  { name: 'Taris', x: 'N', y: 7, important: true },
+  { name: 'Dantooine', x: 'L', y: 4, important: true },
+  { name: 'Dxun', x: 'O', y: 9, important: true },
+  { name: 'Kashyyyk', x: 'P', y: 9, important: true },
+  { name: 'Tython', x: 'K', y: 10, important: false },
+  { name: 'Mandalore', x: 'O', y: 7, important: true }
+];
+
+let lastRoute = null;
+let currentHoveredSector = null;
+
+function init() {
+  const xSelect = document.getElementById('p-x');
+  letters.forEach(l => xSelect.innerHTML += `<option value="${l}">Col ${l}</option>`);
+
+  const ySelect = document.getElementById('p-y');
+  for(let i=1; i<=21; i++) {
+    ySelect.innerHTML += `<option value="${i}">Row ${i}</option>`;
+  }
+
+  buildGrid();
+  updateUI();
+
+  window.addEventListener('resize', () => {
+    drawGridOverlay();
+    if(lastRoute) drawRoute(lastRoute.p1, lastRoute.p2);
+  });
+}
+
+function buildGrid() {
+  const grid = document.getElementById('map-grid');
+  const canvas = document.getElementById('route-canvas');
+  grid.innerHTML = '';
+  grid.appendChild(canvas);
+
+  grid.innerHTML += `<div class="grid-header"></div>`;
+  letters.forEach(l => {
+    grid.innerHTML += `<div class="grid-header">${l}</div>`;
+  });
+
+  for(let y=1; y<=21; y++) {
+    grid.innerHTML += `<div class="grid-header">${y}</div>`;
+    letters.forEach(x => {
+      grid.innerHTML += `<div class="cell" id="cell-${x}-${y}"></div>`;
+    });
+  }
+}
+
+function updateUI() {
+  const fromSel = document.getElementById('route-from');
+  const toSel = document.getElementById('route-to');
+  const currentFrom = fromSel.value;
+  const currentTo = toSel.value;
+
+  fromSel.innerHTML = '<option value="">Origin...</option>';
+  toSel.innerHTML = '<option value="">Destination...</option>';
+
+  planets.sort((a,b) => a.name.localeCompare(b.name)).forEach(p => {
+    fromSel.innerHTML += `<option value="${p.name}">${p.name} (${p.x}-${p.y})</option>`;
+    toSel.innerHTML += `<option value="${p.name}">${p.name} (${p.x}-${p.y})</option>`;
+  });
+
+  fromSel.value = currentFrom;
+  toSel.value = currentTo;
+
+  drawGridOverlay();
+}
+
+function getPlanetOffset(planetName) {
+  const p = planets.find(p => p.name === planetName);
+  if(!p) return { dx: 0, dy: 0 };
+
+  const peers = planets.filter(other => other.x === p.x && other.y === p.y).sort((a,b) => a.name.localeCompare(b.name));
+  const idx = peers.findIndex(other => other.name === p.name);
+
+  if (peers.length <= 1) return { dx: 0, dy: 0 };
+
+  const radius = Math.min(12, peers.length * 4);
+  const angle = (idx / peers.length) * Math.PI * 2;
+
+  return {
+    dx: Math.cos(angle) * radius,
+    dy: Math.sin(angle) * radius
+  };
+}
+
+function drawGridOverlay() {
+  document.querySelectorAll('.planet-marker, .persistent-label').forEach(e => e.remove());
+
+  planets.forEach(p => {
+    const cell = document.getElementById(`cell-${p.x}-${p.y}`);
+    if(!cell) return;
+
+    // Draw the dot marker
+    const marker = document.createElement('div');
+    marker.className = 'planet-marker';
+
+    const offset = getPlanetOffset(p.name);
+    marker.style.marginLeft = `${offset.dx}px`;
+    marker.style.marginTop = `${offset.dy}px`;
+
+    // Click handler to assign planet directly to the route plotter
+    marker.onclick = (e) => {
+      e.stopPropagation();
+      selectPlanetForRoute(p.name);
+    };
+
+    // Draw persistent label on the upper layer if important
+    if (p.important) {
+      const label = document.createElement('div');
+      label.className = `persistent-label sector-label-${p.x}-${p.y}`;
+      label.dataset.planetName = p.name;
+      label.innerText = p.name;
+      label.style.marginLeft = `${offset.dx}px`;
+      label.style.marginTop = `${offset.dy}px`;
+      cell.appendChild(label);
+    }
+
+    // Hover Handlers
+    marker.onmouseenter = (e) => showTooltip(e, p);
+    marker.onmousemove = (e) => moveTooltip(e);
+    marker.onmouseleave = hideTooltip;
+
+    cell.appendChild(marker);
+  });
+}
+
+function selectPlanetForRoute(name) {
+  const fromSel = document.getElementById('route-from');
+  const toSel = document.getElementById('route-to');
+
+  if (!fromSel.value || fromSel.value === name) {
+    fromSel.value = name;
+    log(`> ROUTE ORIGIN SET: ${name}`);
+  } else if (!toSel.value && fromSel.value !== name) {
+    toSel.value = name;
+    log(`> ROUTE DESTINATION SET: ${name}`);
+  } else {
+    fromSel.value = name;
+    toSel.value = '';
+    log(`> ROUTE ORIGIN RESET: ${name}`);
+  }
+}
+
+function showTooltip(e, planet) {
+  currentHoveredSector = `${planet.x}-${planet.y}`;
+
+  document.querySelectorAll(`.sector-label-${currentHoveredSector}`).forEach(el => {
+    if (el.dataset.planetName !== planet.name) {
+      el.classList.add('hidden-label');
+    }
+  });
+
+  const tt = document.getElementById('tooltip');
+  tt.innerHTML = `
+    <div class="tt-header">${planet.name} ${planet.important ? '&#9733;' : ''}</div>
+    <div class="tt-item">Grid Sector: ${planet.x}-${planet.y}</div>
+    <div style="color: var(--accent); font-size: 0.75em; margin-top: 4px;">[Click to assign route]</div>
+  `;
+  tt.style.display = 'block';
+  moveTooltip(e);
+}
+
+function moveTooltip(e) {
+  const tt = document.getElementById('tooltip');
+  tt.style.left = (e.clientX + 15) + 'px';
+  tt.style.top = (e.clientY + 15) + 'px';
+}
+
+function hideTooltip() {
+  document.getElementById('tooltip').style.display = 'none';
+
+  if (currentHoveredSector) {
+    document.querySelectorAll(`.sector-label-${currentHoveredSector}`).forEach(el => {
+      el.classList.remove('hidden-label');
+    });
+    currentHoveredSector = null;
+  }
+}
+
+function addPlanet() {
+  const name = document.getElementById('p-name').value.trim();
+  const x = document.getElementById('p-x').value;
+  const y = parseInt(document.getElementById('p-y').value);
+  const isImportant = document.getElementById('p-important').checked;
+
+  if(!name) {
+    log("> ERROR: Invalid planet designation.");
+    return;
+  }
+
+  const existing = planets.find(p => p.name.toLowerCase() === name.toLowerCase());
+  if(existing) {
+    existing.x = x;
+    existing.y = y;
+    existing.important = isImportant;
+    log(`> DB UPDATE: ${name.toUpperCase()} moved to ${x}-${y}`);
+  } else {
+    planets.push({ name, x, y, important: isImportant });
+    log(`> NEW SYSTEM LOGGED: ${name.toUpperCase()} at ${x}-${y}`);
+  }
+
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-important').checked = false;
+  updateUI();
+}
+
+const letterToNum = char => letters.indexOf(char);
+
+function calculateRoute() {
+  const originName = document.getElementById('route-from').value;
+  const destName = document.getElementById('route-to').value;
+  const hyperClass = parseFloat(document.getElementById('h-class').value);
+
+  if(!originName || !destName) {
+    log("> ERROR: Origin and Destination required.");
+    return;
+  }
+  if(originName === destName) {
+    log("> ERROR: Target matches Origin.");
+    return;
+  }
+
+  const p1 = planets.find(p => p.name === originName);
+  const p2 = planets.find(p => p.name === destName);
+
+  const x1 = letterToNum(p1.x); const y1 = p1.y;
+  const x2 = letterToNum(p2.x); const y2 = p2.y;
+
+  const distUnits = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+  if(distUnits === 0) {
+    log(`> INTRA-SECTOR MICRO-JUMP: ${originName} -> ${destName}<br>`+
+        `> SECTOR: ${p1.x}-${p1.y}<br>`+
+        `> EST. TRAVEL TIME: <span style="color:#fff">< 1 Standard Hour</span>`);
+    drawRoute(p1, p2);
+    return;
+  }
+
+  const baseTimeHrs = 12;
+  const travelTimeHrs = distUnits * baseTimeHrs * hyperClass;
+
+  const d = Math.floor(travelTimeHrs / 24);
+  const h = Math.round(travelTimeHrs % 24);
+
+  log(`> ROUTE PLOTTED: ${originName} -> ${destName}<br>`+
+      `> GRID DISTANCE: ${distUnits.toFixed(2)} Sectors<br>`+
+      `> HYPERDRIVE: Class ${hyperClass}<br>`+
+      `> EST. TRAVEL TIME: <span style="color:#fff">${d} Days, ${h} Hrs</span>`);
+
+  drawRoute(p1, p2);
+}
+
+function drawRoute(p1, p2) {
+  lastRoute = {p1, p2};
+  const canvas = document.getElementById('route-canvas');
+  const ctx = canvas.getContext('2d');
+  const grid = document.getElementById('map-grid');
+
+  canvas.width = grid.clientWidth - 40;
+  canvas.height = grid.clientHeight - 40;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const cellWidth = canvas.width / 19;
+  const cellHeight = canvas.height / 21;
+
+  const getVisualCenter = (planetStr) => {
+    const p = planets.find(x => x.name === planetStr);
+    const offset = getPlanetOffset(planetStr);
+    return {
+      x: letterToNum(p.x) * cellWidth + (cellWidth/2) + offset.dx,
+      y: (p.y - 1) * cellHeight + (cellHeight/2) + offset.dy
+    };
+  };
+
+  const start = getVisualCenter(p1.name);
+  const end = getVisualCenter(p2.name);
+
+  ctx.beginPath();
+  ctx.moveTo(start.x, start.y);
+  ctx.lineTo(end.x, end.y);
+  ctx.strokeStyle = 'rgba(243, 156, 18, 0.8)';
+  ctx.lineWidth = 3;
+  ctx.setLineDash([8, 6]);
+  ctx.stroke();
+}
+
+function log(msg) {
+  document.getElementById('output-log').innerHTML = msg;
+}
+
+function exportData() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(planets, null, 2));
+  const a = document.createElement('a');
+  a.href = dataStr;
+  a.download = 'nav_computer_data.json';
+  a.click();
+  log("> DATA EXPORTED TO DATAPAD (.json)");
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(Array.isArray(data)) {
+        planets = data;
+        updateUI();
+        log("> NAV DATA LOADED SUCCESSFULLY");
+      }
+    } catch (err) {
+      log("> ERROR: CORRUPTED DATA FILE");
+    }
+  };
+  reader.readAsText(file);
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
