@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Galactic Astrogation Computer</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Prevent status box squishing and allow panel scrolling */
+    .panel.controls {
+      overflow-y: auto !important;
+    }
+    
+    #output-log {
+      height: auto !important;
+      min-height: 70px;
+      max-height: none !important;
+      overflow-y: visible !important;
+      word-break: break-word;
+      white-space: normal;
+      flex-shrink: 0 !important; /* Locks size so it never gets squished */
+    }
+  </style>
 </head>
 <body>
 
@@ -32,7 +48,6 @@
       </div>
     </div>
 
-    <!-- Removed 'expanded' class here -->
     <div class="control-group" id="plot-hyperlane-group">
       <div class="collapsible-header" onclick="togglePlotHyperlane()">
         <span>Manual Hyperlane Plotter</span>
@@ -53,21 +68,27 @@
       </div>
     </div>
 
+    <!-- UNIFIED ROUTE PLOTTER -->
     <div class="control-group">
       <label>Hyperspace Route Plotter</label>
-      <div class="autocomplete-container">
-        <input type="text" id="route-from" placeholder="Search origin system..." autocomplete="off" />
-        <div id="from-suggestions" class="suggestions-list"></div>
+
+      <div style="margin-top: 10px; font-size: 0.85em; color: #8b949e;">Add Waypoints, in order (2 or more):</div>
+      <div class="autocomplete-container" style="margin-top: 5px;">
+        <input type="text" id="route-waypoint-input" placeholder="Search system, click map, or press Enter..." autocomplete="off" />
+        <div id="waypoint-suggestions" class="suggestions-list"></div>
       </div>
-      <div class="autocomplete-container" style="margin-top: 8px;">
-        <input type="text" id="route-to" placeholder="Search destination system..." autocomplete="off" />
-        <div id="to-suggestions" class="suggestions-list"></div>
-      </div>
-      <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
+      <input type="text" id="route-sequence" placeholder="Waypoints will appear here..." readonly style="margin-top: 8px; color: var(--route);" />
+
+      <hr style="border: none; border-top: 1px solid #30363d; margin: 15px 0;">
+      <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
         <label style="flex: 1;">Hyperdrive Class:</label>
         <input type="number" id="h-class" value="1.0" step="0.1" min="0.1" style="flex: 1;" title="Lower is faster" />
       </div>
-      <button onclick="calculateRoute()" style="margin-top: 5px;">Calculate Jump</button>
+
+      <div class="flex-row">
+        <button onclick="clearRouteSequence()" style="background: #30363d; font-size: 0.75em;">Clear Waypoints</button>
+        <button onclick="calculateRoute()" style="flex: 1;">Calc Jump Route</button>
+      </div>
     </div>
 
     <div class="output" id="output-log">
@@ -75,21 +96,25 @@
       > NAVICOMPUTER READY...
     </div>
 
-    <div class="control-group" style="margin-top: auto;">
-      <label>Memory Core Management</label>
-
-      <button onclick="generateHyperlaneGrid()" style="margin-bottom: 8px; background: #238636;">Generate Hyperlane Grid</button>
-
-      <div class="flex-row" style="margin-bottom: 5px;">
-        <button onclick="exportData()">Export Planets</button>
-        <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)" />
-        <button onclick="document.getElementById('import-file').click()">Load Planets</button>
+    <div class="control-group" id="memory-core-group" style="margin-top: auto;">
+      <div class="collapsible-header" onclick="toggleMemoryCore()">
+        <span>Memory Core Management</span>
+        <span class="arrow">&#9654;</span>
       </div>
+      <div class="collapsible-content">
+        <button onclick="generateHyperlaneGrid()" style="margin-bottom: 8px; background: #238636;">Generate Hyperlane Grid</button>
 
-      <div class="flex-row">
-        <button onclick="exportHyperlanes()">Export Routes</button>
-        <input type="file" id="import-h-file" accept=".json" style="display: none;" onchange="importHyperlanes(event)" />
-        <button onclick="document.getElementById('import-h-file').click()">Load Routes</button>
+        <div class="flex-row" style="margin-bottom: 5px;">
+          <button onclick="exportData()">Export Planets</button>
+          <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)" />
+          <button onclick="document.getElementById('import-file').click()">Load Planets</button>
+        </div>
+
+        <div class="flex-row">
+          <button onclick="exportHyperlanes()">Export Routes</button>
+          <input type="file" id="import-h-file" accept=".json" style="display: none;" onchange="importHyperlanes(event)" />
+          <button onclick="document.getElementById('import-h-file').click()">Load Routes</button>
+        </div>
       </div>
     </div>
   </div>
