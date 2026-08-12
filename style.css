@@ -44,15 +44,29 @@ body {
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  align-items: center;
+  min-height: 0; /* Allows flex items to shrink below content size */
+  min-width: 0;  /* Prevents horizontal flex overflow */
+}
+
+.map-container h2 {
+  flex-shrink: 0; /* Prevents the header from collapsing */
+  width: 100%;
 }
 
 .map-viewport {
-  flex: 1;
+  aspect-ratio: 1 / 1;
+  height: 100%;
+  max-height: calc(100% - 50px); /* Reserve space for h2 title */
+  max-width: 100%;
+  width: auto;
+  margin: auto;
   overflow: hidden;
   position: relative;
   cursor: grab;
   display: flex;
   border: 1px solid var(--grid-line);
+  box-sizing: border-box;
 }
 
 .map-viewport:active {
@@ -66,6 +80,7 @@ h2 {
   padding-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  width: 100%;
 }
 
 .control-group {
