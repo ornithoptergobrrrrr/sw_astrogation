@@ -9,6 +9,8 @@ let currentHoveredSector = null;
 let isClickPlotMode = false;
 let currentBuildingSequence = [];
 
+let routeSequence = [];
+
 let scale = 1;
 const minScale = 1;
 const maxScale = 4;
@@ -30,13 +32,11 @@ async function init() {
   setupZoomAndPan();
   setupCanvasInteraction();
 
-  // Await both data fetch operations before rendering
   await loadPlanetsData();
   await loadHyperlanesData();
 
   refreshMapData();
-  setupAutocomplete('route-from', 'from-suggestions');
-  setupAutocomplete('route-to', 'to-suggestions');
+  setupAutocomplete('route-waypoint-input', 'waypoint-suggestions', addWaypoint);
 
   window.addEventListener('resize', () => {
     drawCanvas();
@@ -50,6 +50,11 @@ function toggleLogSystem() {
 
 function togglePlotHyperlane() {
   const group = document.getElementById('plot-hyperlane-group');
+  group.classList.toggle('expanded');
+}
+
+function toggleMemoryCore() {
+  const group = document.getElementById('memory-core-group');
   group.classList.toggle('expanded');
 }
 
@@ -72,9 +77,25 @@ function clearCurrentBuilding() {
   log("> HYPERLANE STRING CLEARED.");
 }
 
+function addWaypoint(name) {
+  if (routeSequence.length > 0 && routeSequence[routeSequence.length - 1] === name) return;
+  routeSequence.push(name);
+  document.getElementById('route-sequence').value = routeSequence.join(', ');
+  log(`> WAYPOINT ADDED: <span style="color:#fff">${name}</span> (${routeSequence.length} stop${routeSequence.length > 1 ? 's' : ''} plotted)`);
+  drawCanvas();
+}
+
+function clearRouteSequence() {
+  routeSequence = [];
+  document.getElementById('route-sequence').value = '';
+  lastRoutePath = null;
+  drawCanvas();
+  log("> ROUTE WAYPOINTS CLEARED.");
+}
+
 function refreshMapData() {
   drawGridOverlay();
-  drawCanvas(); 
+  drawCanvas();
 }
 
 async function loadHyperlanesData() {
@@ -83,7 +104,6 @@ async function loadHyperlanesData() {
     if (!response.ok) throw new Error();
     const data = await response.json();
 
-    // Process and map the data (including backwards compatibility for older route formats)
     hyperlanes = data.map(item => {
       if (item.u && item.v && !item.planets) {
         return { name: `${item.u}-${item.v} Route`, planets: [item.u, item.v], isCustom: true };
@@ -306,13 +326,13 @@ async function generateHyperlaneGrid() {
     let crosses = false;
     for (const edge of activeEdges) {
       if (cand.p1.name === edge.p1.name || cand.p1.name === edge.p2.name ||
-          cand.p2.name === edge.p1.name || cand.p2.name === edge.p2.name) {
+        cand.p2.name === edge.p1.name || cand.p2.name === edge.p2.name) {
         continue;
-      }
-      if (segmentsCross(cand.p1, cand.p2, edge.p1, edge.p2)) {
-        crosses = true;
-        break;
-      }
+        }
+        if (segmentsCross(cand.p1, cand.p2, edge.p1, edge.p2)) {
+          crosses = true;
+          break;
+        }
     }
 
     if (!crosses) {
@@ -337,7 +357,6 @@ function findShortestPath(startName, destName) {
   hyperlanes.forEach(lane => {
     const routePlanets = lane.planets || [];
 
-    // Apply a 2.5x speed boost (distance reduction) for custom/named hyperlanes
     const speedMultiplier = lane.isCustom ? 2.5 : 1.0;
 
     for (let i = 0; i < routePlanets.length - 1; i++) {
@@ -350,7 +369,6 @@ function findShortestPath(startName, destName) {
         const x1 = letterToNum(p1.x), y1 = p1.y;
         const x2 = letterToNum(p2.x), y2 = p2.y;
 
-        // Calculate raw distance, then divide by the multiplier
         const rawDist = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
         const effectiveDist = rawDist / speedMultiplier;
 
@@ -378,7 +396,7 @@ function findShortestPath(startName, destName) {
   while (unvisited.size > 0) {
     let current = null;
     let shortestDist = Infinity;
-    
+
     unvisited.forEach(node => {
       if (distances[node] < shortestDist) {
         shortestDist = distances[node];
@@ -434,9 +452,19 @@ function buildGrid() {
   }
 }
 
-function setupAutocomplete(inputId, listId) {
+function setupAutocomplete(inputId, listId, onSelect) {
   const input = document.getElementById(inputId);
   const list = document.getElementById(listId);
+
+  const choosePlanet = (name) => {
+    if (onSelect) {
+      onSelect(name);
+      input.value = '';
+    } else {
+      input.value = name;
+    }
+    list.style.display = 'none';
+  };
 
   input.addEventListener('input', () => {
     const val = input.value.toLowerCase().trim();
@@ -456,14 +484,26 @@ function setupAutocomplete(inputId, listId) {
       const item = document.createElement('div');
       item.className = 'suggestion-item';
       item.innerHTML = `${p.name} <span style="color:#8b949e">(${p.x}-${p.y})</span>`;
-      item.onclick = () => {
-        input.value = p.name;
-        list.style.display = 'none';
-      };
+      item.onclick = () => choosePlanet(p.name);
       list.appendChild(item);
     });
     list.style.display = 'block';
   });
+
+  if (onSelect) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const val = input.value.trim();
+      if (!val) return;
+      const match = planets.find(p => p.name.toLowerCase() === val.toLowerCase());
+      if (match) {
+        choosePlanet(match.name);
+      } else {
+        log(`> ERROR: System '${val}' not found in database.`);
+      }
+    });
+  }
 
   document.addEventListener('click', (e) => {
     if (!input.contains(e.target) && !list.contains(e.target)) {
@@ -487,21 +527,21 @@ function getPlanetOffset(planetName) {
   const peers = planets.filter(other => other.x === p.x && other.y === p.y).sort((a,b) => a.name.localeCompare(b.name));
   if (peers.length <= 1) {
     let angle = (hashCode(p.name + "_edge_angle") % 1000) / 1000 * Math.PI * 2;
-    let radius = 12 + ((hashCode(p.name + "_edge_rad") % 1000) / 1000) * 11; 
+    let radius = 12 + ((hashCode(p.name + "_edge_rad") % 1000) / 1000) * 11;
     return { dx: Math.cos(angle) * radius, dy: Math.sin(angle) * radius };
   }
 
-  const maxOffset = 22; 
-  const minDistance = 7; 
+  const maxOffset = 22;
+  const minDistance = 7;
   const placedOffsets = [];
 
   for (let i = 0; i < peers.length; i++) {
     const peer = peers[i];
     let angle = (hashCode(peer.name + "_angle") % 1000) / 1000 * Math.PI * 2;
-    let radius = 6 + (hashCode(peer.name + "_rad") % 1000) / 1000 * (maxOffset - 6); 
+    let radius = 6 + (hashCode(peer.name + "_rad") % 1000) / 1000 * (maxOffset - 6);
     let dx = Math.cos(angle) * radius;
     let dy = Math.sin(angle) * radius;
-    
+
     let attempts = 0;
     let collision = true;
 
@@ -564,7 +604,7 @@ function handlePlanetClick(name) {
     log(`> ADDED TO HYPERLANE STRING: <span style="color:#fff">${name}</span> (${currentBuildingSequence.length} systems)`);
     drawCanvas();
   } else {
-    selectPlanetForRoute(name);
+    addWaypoint(name);
   }
 }
 
@@ -599,7 +639,7 @@ function drawCanvas() {
   ctx.scale(dpr, dpr);
 
   const segmentCounts = {};
-  
+
   hyperlanes.forEach(lane => {
     const routePlanets = lane.planets || [];
     for (let i = 0; i < routePlanets.length - 1; i++) {
@@ -629,7 +669,7 @@ function drawCanvas() {
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
         ctx.lineTo(end.x, end.y);
-        
+
         if (isCustom) {
           ctx.lineWidth = 2.5;
           ctx.strokeStyle = 'rgba(188, 19, 254, 0.85)';
@@ -655,6 +695,24 @@ function drawCanvas() {
     for (let i = 0; i < currentBuildingSequence.length - 1; i++) {
       const start = getVisualCenter(currentBuildingSequence[i], baseWidth, baseHeight);
       const end = getVisualCenter(currentBuildingSequence[i+1], baseWidth, baseHeight);
+      if (start && end) {
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.stroke();
+      }
+    }
+    ctx.setLineDash([]);
+  }
+
+  if (routeSequence && routeSequence.length > 1) {
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = 'rgba(243, 156, 18, 0.7)';
+    ctx.setLineDash([4, 4]);
+
+    for (let i = 0; i < routeSequence.length - 1; i++) {
+      const start = getVisualCenter(routeSequence[i], baseWidth, baseHeight);
+      const end = getVisualCenter(routeSequence[i+1], baseWidth, baseHeight);
       if (start && end) {
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
@@ -790,28 +848,11 @@ function showLaneTooltip(e, lane) {
   const tt = document.getElementById('tooltip');
   const numSystems = lane.planets ? lane.planets.length : 0;
   tt.innerHTML = `
-    <div class="tt-header" style="color: var(--custom-lane);">${lane.name || 'Hyperlane Segment'}</div>
-    <div style="color: #8b949e; font-size: 0.75em; margin-top: 4px;">Systems: ${numSystems}</div>
+  <div class="tt-header" style="color: var(--custom-lane);">${lane.name || 'Hyperlane Segment'}</div>
+  <div style="color: #8b949e; font-size: 0.75em; margin-top: 4px;">Systems: ${numSystems}</div>
   `;
   tt.style.display = 'block';
   moveTooltip(e);
-}
-
-function selectPlanetForRoute(name) {
-  const fromInput = document.getElementById('route-from');
-  const toInput = document.getElementById('route-to');
-
-  if (!fromInput.value || fromInput.value === name) {
-    fromInput.value = name;
-    log(`> ROUTE ORIGIN SET: ${name}`);
-  } else if (!toInput.value && fromInput.value !== name) {
-    toInput.value = name;
-    log(`> ROUTE DESTINATION SET: ${name}`);
-  } else {
-    fromInput.value = name;
-    toInput.value = '';
-    log(`> ROUTE ORIGIN RESET: ${name}`);
-  }
 }
 
 function showPlanetTooltip(e, planet) {
@@ -823,11 +864,19 @@ function showPlanetTooltip(e, planet) {
   });
 
   const tt = document.getElementById('tooltip');
-  const actionText = isClickPlotMode ? '[Click to add to hyperlane string]' : '[Click to assign route]';
+  let actionText = '[Click to add waypoint]';
+  let actionColor = 'var(--route)';
+
+  if (isClickPlotMode) {
+    actionText = '[Click to add to hyperlane string]';
+    actionColor = 'var(--building)';
+  }
+
   tt.innerHTML = `
-    <div class="tt-header">${planet.name} ${planet.important ? '&#9733;' : ''}</div>
-    <div class="tt-item">Grid Sector: ${planet.x}-${planet.y}</div>
-    <div style="color: ${isClickPlotMode ? 'var(--building)' : 'var(--accent)'}; font-size: 0.75em; margin-top: 4px;">${actionText}</div>
+  <div class="tt-header">${planet.name} ${planet.important ? '&#9733;' : ''}</div>
+  <div class="tt-item">Grid Sector: ${planet.x}-${planet.y}</div>
+  <div style="color: ${actionColor}; font-size: 0.75em; margin-top: 4px;">${actionText}</div>
+
   `;
   tt.style.display = 'block';
   moveTooltip(e);
@@ -885,47 +934,69 @@ function addPlanet() {
 }
 
 function calculateRoute() {
-  const originName = document.getElementById('route-from').value.trim();
-  const destName = document.getElementById('route-to').value.trim();
-  const hyperClass = parseFloat(document.getElementById('h-class').value);
-
-  const p1 = planets.find(p => p.name.toLowerCase() === originName.toLowerCase());
-  const p2 = planets.find(p => p.name.toLowerCase() === destName.toLowerCase());
-
-  if(!p1 || !p2) {
-    log("> ERROR: Valid Origin and Destination required.");
+  if (routeSequence.length < 2) {
+    log("> ERROR: Need at least 2 waypoints to calculate a route.");
     return;
   }
-  if(p1.name === p2.name) {
-    log("> ERROR: Target matches Origin.");
-    return;
-  }
+
+  const hyperClass = parseFloat(document.getElementById('h-class').value) || 1.0;
 
   if (hyperlanes.length === 0) {
     log("> ERROR: No hyperlane network found.");
     return;
   }
 
-  const { path, cost } = findShortestPath(p1.name, p2.name);
+  let fullPath = [];
+  let totalCost = 0;
 
-  if (cost === Infinity || path.length === 0) {
-    log(`> ERROR: No hyperlane path found between ${p1.name} and ${p2.name}.`);
-    lastRoutePath = null;
-    drawCanvas();
+  for (let i = 0; i < routeSequence.length - 1; i++) {
+    const p1 = planets.find(p => p.name.toLowerCase() === routeSequence[i].toLowerCase());
+    const p2 = planets.find(p => p.name.toLowerCase() === routeSequence[i + 1].toLowerCase());
+
+    if (!p1 || !p2) {
+      log("> ERROR: Unknown system in waypoint list.");
+      return;
+    }
+    if (p1.name === p2.name) continue;
+
+    const { path: legPath, cost: legCost } = findShortestPath(p1.name, p2.name);
+
+    if (legCost === Infinity || legPath.length === 0) {
+      log(`> FATAL: No hyperlane path exists between <span style="color:#fff">${p1.name}</span> and <span style="color:#fff">${p2.name}</span>. Navigation aborted.`);
+      lastRoutePath = null;
+      drawCanvas();
+      return;
+    }
+
+    fullPath = fullPath.length === 0 ? fullPath.concat(legPath) : fullPath.concat(legPath.slice(1));
+    totalCost += legCost;
+  }
+
+  if (fullPath.length < 2) {
+    log("> ERROR: Waypoints resolved to a single system - nowhere to jump to.");
     return;
   }
 
   const baseTimeHrs = 12;
-  const travelTimeHrs = cost * baseTimeHrs * hyperClass;
+  const travelTimeHrs = totalCost * baseTimeHrs * hyperClass;
   const d = Math.floor(travelTimeHrs / 24);
   const h = Math.round(travelTimeHrs % 24);
 
-  log(`> ROUTE PLOTTED: <span style="color:#fff">${p1.name}</span> &rarr; <span style="color:#fff">${p2.name}</span><br>`+
-      `> TOTAL JUMP DISTANCE: ${cost.toFixed(2)} Sectors (${path.length - 1} Jumps)<br>`+
-      `> HYPERDRIVE: Class ${hyperClass}<br>`+
-      `> EST. TRAVEL TIME: <span style="color:#fff">${d} Days, ${h} Hrs</span>`);
+  const pathDisplay = routeSequence.length > 2
+  ? `<span style="color:#fff">${routeSequence[0]}</span> &rarr; ... &rarr; <span style="color:#fff">${routeSequence[routeSequence.length - 1]}</span> <span style="color:#8b949e">(${routeSequence.length} waypoints)</span>`
+  : `<span style="color:#fff">${routeSequence[0]}</span> &rarr; <span style="color:#fff">${routeSequence[1]}</span>`;
 
-  lastRoutePath = path;
+  log(`> ROUTE PLOTTED:<br>`+
+  `> PATH: ${pathDisplay}<br>`+
+  `> TOTAL JUMP DISTANCE: ${totalCost.toFixed(2)} Sectors (${fullPath.length - 1} Jumps)<br>`+
+  `> HYPERDRIVE: Class ${hyperClass}<br>`+
+  `> EST. TRAVEL TIME: <span style="color:#fff">${d} Days, ${h} Hrs</span>`);
+
+  lastRoutePath = fullPath;
+
+  routeSequence = [];
+  document.getElementById('route-sequence').value = '';
+
   drawCanvas();
 }
 
