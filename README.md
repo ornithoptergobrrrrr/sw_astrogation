@@ -1,5 +1,5 @@
 Takes a list of planets, plots their X and Y coordinates on the Galactic Grid, Pseudo-RNGs the placement within the cell, and connects planets with hyperlanes. Hyperlanes are then used to plot courses between systems.
-As such, planets are only in their general area on the Galactic Grid, not their canon locations within the cell. If some nerd wants to fork it to fix that, I'd be delighted, but I can't be f*cked to do it. 
+As such, planets are only in their general area on the Galactic Grid, not their canon locations within the cell. If some nerd wants to fork it to fix that, I'd be delighted, but I can't be bothered to do it. 
 Also, the main hyperlanes are 2.5x faster than normal ones.
 
 Credits   
