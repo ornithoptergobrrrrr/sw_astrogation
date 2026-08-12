@@ -1,7 +1,7 @@
 Completely made in HTML/JS/CSS.   
 Takes a list of systems, plots their X and Y coordinates on the Galactic Grid, Pseudo-RNGs the placement within the cell, and connects planets with hyperlanes. Hyperlanes are then used to plot courses between systems.
 As such, systems are only in their general area on the Galactic Grid, not their canon locations within the cell. If some nerd wants to fork it to fix that, I'd be delighted, but I can't be bothered to do it. There's even a function to create custom Hyperlanes and generate from that base.   
-Also, the main hyperlanes are 2.5x faster than normal ones.   
+Also, custom hyperlanes are 2.5x faster than normal ones.   
 
 How to use   
 Click two or more systems or type them into the Hyperspace Route Plotter to plot a course.   
