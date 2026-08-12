@@ -336,19 +336,29 @@ function findShortestPath(startName, destName) {
 
   hyperlanes.forEach(lane => {
     const routePlanets = lane.planets || [];
+
+    // Apply a 2.5x speed boost (distance reduction) for custom/named hyperlanes
+    const speedMultiplier = lane.isCustom ? 2.5 : 1.0;
+
     for (let i = 0; i < routePlanets.length - 1; i++) {
       const u = routePlanets[i];
       const v = routePlanets[i+1];
       const p1 = planets.find(p => p.name === u);
       const p2 = planets.find(p => p.name === v);
+
       if (p1 && p2) {
         const x1 = letterToNum(p1.x), y1 = p1.y;
         const x2 = letterToNum(p2.x), y2 = p2.y;
-        const dist = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+        // Calculate raw distance, then divide by the multiplier
+        const rawDist = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        const effectiveDist = rawDist / speedMultiplier;
+
         if (!adjacency[u]) adjacency[u] = [];
         if (!adjacency[v]) adjacency[v] = [];
-        adjacency[u].push({ node: v, weight: dist });
-        adjacency[v].push({ node: u, weight: dist });
+
+        adjacency[u].push({ node: v, weight: effectiveDist });
+        adjacency[v].push({ node: u, weight: effectiveDist });
       }
     }
   });
