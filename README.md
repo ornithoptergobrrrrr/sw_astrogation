@@ -3,7 +3,7 @@ As such, systems are only in their general area on the Galactic Grid, not their 
 Also, the main hyperlanes are 2.5x faster than normal ones.   
 
 How to use   
-Click two systems or type it into the Hyperspace Route Plotter to plot a course.   
+Click two systems or type them into the Hyperspace Route Plotter to plot a course.   
 Add a system by clicking on Log System/Add Planet and typing in the system's name and Galactic Grid coordinates. It will automagically populate into the cell cluster.   
 Add a custom hyperlane by either typing a name and a string of systems into the Manual Hyperlane Plotter or use the Click-to-Plot system by activating the checkbox.   
 After creating custom hyperlanes and systems, click the Generate Hyperlane Grid button to connect your custom systems and hyperlanes to the rest of the galaxy.
