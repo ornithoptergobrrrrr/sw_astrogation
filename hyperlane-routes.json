@@ -88,14 +88,6 @@
     "isCustom": true
   },
   {
-    "name": "Noe'ha'on - Noe'ha'on Route",
-    "planets": [
-      "Noe'ha'on",
-      "Noe'ha'on"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Juvex - Vulcar Route",
     "planets": [
       "Juvex",
@@ -2812,14 +2804,6 @@
     "planets": [
       "Dalcretti",
       "Rearqu Cluster"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Milagro - New Cov Route",
-    "planets": [
-      "Milagro",
-      "New Cov"
     ],
     "isCustom": false
   },
@@ -11064,14 +11048,6 @@
     "isCustom": false
   },
   {
-    "name": "Gholondreine - Noe'ha'on Route",
-    "planets": [
-      "Gholondreine",
-      "Noe'ha'on"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Gbu - Munto Codru Route",
     "planets": [
       "Gbu",
@@ -14168,14 +14144,6 @@
     "isCustom": false
   },
   {
-    "name": "Noe'ha'on - Pendari Route",
-    "planets": [
-      "Noe'ha'on",
-      "Pendari"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Fedje - Monhudle Route",
     "planets": [
       "Fedje",
@@ -14756,14 +14724,6 @@
     "planets": [
       "Giju",
       "Renillis"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Natalon - Noe'ha'on Route",
-    "planets": [
-      "Natalon",
-      "Noe'ha'on"
     ],
     "isCustom": false
   },
