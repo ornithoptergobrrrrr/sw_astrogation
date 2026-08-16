@@ -8,7 +8,6 @@ let currentHoveredSector = null;
 
 let isClickPlotMode = false;
 let currentBuildingSequence = [];
-
 let routeSequence = [];
 
 let scale = 1;
@@ -18,6 +17,15 @@ let panX = 0;
 let panY = 0;
 let isDragging = false;
 let startX = 0, startY = 0;
+
+// --- DRAG TRACKING VARIABLES ---
+let dragStartX = 0, dragStartY = 0;
+let hasDragged = false; 
+
+// --- CACHE VARIABLES ---
+let offsetCache = {};
+let cachedSegmentCounts = {};
+let visualCentersCache = {};
 
 async function init() {
   const xSelect = document.getElementById('p-x');
@@ -43,20 +51,9 @@ async function init() {
   });
 }
 
-function toggleLogSystem() {
-  const group = document.getElementById('log-system-group');
-  group.classList.toggle('expanded');
-}
-
-function togglePlotHyperlane() {
-  const group = document.getElementById('plot-hyperlane-group');
-  group.classList.toggle('expanded');
-}
-
-function toggleMemoryCore() {
-  const group = document.getElementById('memory-core-group');
-  group.classList.toggle('expanded');
-}
+function toggleLogSystem() { document.getElementById('log-system-group').classList.toggle('expanded'); }
+function togglePlotHyperlane() { document.getElementById('plot-hyperlane-group').classList.toggle('expanded'); }
+function toggleMemoryCore() { document.getElementById('memory-core-group').classList.toggle('expanded'); }
 
 function toggleClickPlotMode(checkbox) {
   isClickPlotMode = checkbox.checked;
@@ -93,7 +90,10 @@ function clearRouteSequence() {
   log("> ROUTE WAYPOINTS CLEARED.");
 }
 
+// Rebuilds caches whenever core data changes
 function refreshMapData() {
+  recalculateAllOffsets();
+  updateSegmentCounts();
   drawGridOverlay();
   drawCanvas();
 }
@@ -113,7 +113,6 @@ async function loadHyperlanesData() {
       }
       return item;
     });
-
     log("> ROUTE DATA LOADED FROM hyperlane-routes.json");
   } catch (err) {
     log("> NO LOCAL HYPERLANE DATA FOUND. NETWORK EMPTY.");
@@ -127,39 +126,42 @@ function setupZoomAndPan() {
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
     const zoomIntensity = 0.15;
-    if (e.deltaY < 0) {
-      scale *= (1 + zoomIntensity);
-    } else {
-      scale /= (1 + zoomIntensity);
-    }
+    if (e.deltaY < 0) scale *= (1 + zoomIntensity);
+    else scale /= (1 + zoomIntensity);
     updateTransform();
   }, { passive: false });
 
   viewport.addEventListener('mousedown', (e) => {
     if (e.target.closest('.planet-marker')) return;
     isDragging = true;
+    hasDragged = false; // Reset drag flag
+    dragStartX = e.clientX; // Record exact start X
+    dragStartY = e.clientY; // Record exact start Y
     startX = e.clientX - panX;
     startY = e.clientY - panY;
   });
 
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
+    
+    // If the mouse moves more than 3px, classify as a deliberate drag
+    if (Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) > 3) {
+      hasDragged = true;
+    }
+
     panX = e.clientX - startX;
     panY = e.clientY - startY;
     updateTransform();
   });
 
-  window.addEventListener('mouseup', () => {
-    isDragging = false;
-  });
+  window.addEventListener('mouseup', () => { isDragging = false; });
 }
 
 function updateTransform() {
   scale = Math.max(minScale, Math.min(maxScale, scale));
 
   if (scale === 1) {
-    panX = 0;
-    panY = 0;
+    panX = 0; panY = 0;
   } else {
     const viewport = document.getElementById('map-viewport');
     const maxPanX = (viewport.clientWidth * (scale - 1)) / 2;
@@ -202,27 +204,15 @@ function saveCustomHyperlane() {
   const name = document.getElementById('hp-name').value.trim();
   const rawSequence = document.getElementById('hp-sequence').value.trim();
 
-  if (!name) {
-    log("> ERROR: Hyperlane name required.");
-    return;
-  }
-  if (!rawSequence) {
-    log("> ERROR: Planet sequence required.");
-    return;
-  }
+  if (!name) return log("> ERROR: Hyperlane name required.");
+  if (!rawSequence) return log("> ERROR: Planet sequence required.");
 
   const planetList = rawSequence.split(',').map(s => s.trim()).filter(s => s.length > 0);
-  if (planetList.length < 2) {
-    log("> ERROR: A hyperlane must connect at least 2 planets.");
-    return;
-  }
+  if (planetList.length < 2) return log("> ERROR: A hyperlane must connect at least 2 planets.");
 
   for (const pName of planetList) {
     const found = planets.find(p => p.name.toLowerCase() === pName.toLowerCase());
-    if (!found) {
-      log(`> ERROR: Planet '${pName}' not found in database.`);
-      return;
-    }
+    if (!found) return log(`> ERROR: Planet '${pName}' not found in database.`);
   }
 
   const existingLane = hyperlanes.find(l => l.name && l.name.toLowerCase() === name.toLowerCase());
@@ -241,14 +231,13 @@ function saveCustomHyperlane() {
   document.getElementById('hp-click-mode').checked = false;
   isClickPlotMode = false;
   document.getElementById('hp-status').innerText = 'Status: Click-to-Plot Inactive';
+  
+  updateSegmentCounts();
   drawCanvas();
 }
 
 async function generateHyperlaneGrid() {
-  if (planets.length < 2) {
-    log("> ERROR: Need at least 2 systems logged to generate a network.");
-    return;
-  }
+  if (planets.length < 2) return log("> ERROR: Need at least 2 systems logged to generate a network.");
 
   log("> GENERATING CLEAN GALACTIC GRID...");
   await new Promise(resolve => setTimeout(resolve, 10));
@@ -257,10 +246,7 @@ async function generateHyperlaneGrid() {
 
   const getCoord = p => {
     const off = getPlanetOffset(p.name);
-    return {
-      x: letterToNum(p.x) + (off.dx / 30),
-      y: p.y + (off.dy / 30)
-    };
+    return { x: letterToNum(p.x) + (off.dx / 30), y: p.y + (off.dy / 30) };
   };
 
   const coords = new Map();
@@ -280,24 +266,18 @@ async function generateHyperlaneGrid() {
       const p1 = planets[i];
       const p2 = planets[j];
       const d12 = dist(p1, p2);
-
       if (d12 > MAX_HYPERLANE_DIST) continue;
 
       let isValid = true;
-
       for (let k = 0; k < planets.length; k++) {
         if (k === i || k === j) continue;
         const p3 = planets[k];
-
         if (Math.max(dist(p1, p3), dist(p2, p3)) < d12 - 0.001) {
           isValid = false;
           break;
         }
       }
-
-      if (isValid) {
-        candidates.push({ p1, p2, d: d12 });
-      }
+      if (isValid) candidates.push({ p1, p2, d: d12 });
     }
   }
 
@@ -315,7 +295,6 @@ async function generateHyperlaneGrid() {
 
     const o1 = orient(ca1, ca2, cb1), o2 = orient(ca1, ca2, cb2);
     const o3 = orient(cb1, cb2, ca1), o4 = orient(cb1, cb2, ca2);
-
     return (o1 !== o2 && o3 !== o4);
   }
 
@@ -326,13 +305,12 @@ async function generateHyperlaneGrid() {
     let crosses = false;
     for (const edge of activeEdges) {
       if (cand.p1.name === edge.p1.name || cand.p1.name === edge.p2.name ||
-        cand.p2.name === edge.p1.name || cand.p2.name === edge.p2.name) {
-        continue;
-        }
-        if (segmentsCross(cand.p1, cand.p2, edge.p1, edge.p2)) {
-          crosses = true;
-          break;
-        }
+          cand.p2.name === edge.p1.name || cand.p2.name === edge.p2.name) continue;
+          
+      if (segmentsCross(cand.p1, cand.p2, edge.p1, edge.p2)) {
+        crosses = true;
+        break;
+      }
     }
 
     if (!crosses) {
@@ -346,6 +324,7 @@ async function generateHyperlaneGrid() {
     }
   }
 
+  updateSegmentCounts();
   drawCanvas();
   log(`> HYPERLANE GRID GENERATED: ${addedCount} clean links across ${planets.length} systems.<br>> Relative Neighborhood Topology: Crisp grid mesh, localized routes, zero line crossings.`);
 }
@@ -356,7 +335,6 @@ function findShortestPath(startName, destName) {
 
   hyperlanes.forEach(lane => {
     const routePlanets = lane.planets || [];
-
     const speedMultiplier = lane.isCustom ? 2.5 : 1.0;
 
     for (let i = 0; i < routePlanets.length - 1; i++) {
@@ -436,20 +414,23 @@ function findShortestPath(startName, destName) {
 function buildGrid() {
   const grid = document.getElementById('map-grid');
   const canvas = document.getElementById('route-canvas');
+  
   grid.innerHTML = '';
   grid.appendChild(canvas);
 
-  grid.innerHTML += `<div class="grid-header"></div>`;
+  let gridHTML = `<div class="grid-header"></div>`;
   letters.forEach(l => {
-    grid.innerHTML += `<div class="grid-header">${l}</div>`;
+    gridHTML += `<div class="grid-header">${l}</div>`;
   });
 
   for(let y=1; y<=21; y++) {
-    grid.innerHTML += `<div class="grid-header">${y}</div>`;
+    gridHTML += `<div class="grid-header">${y}</div>`;
     letters.forEach(x => {
-      grid.innerHTML += `<div class="cell" id="cell-${x}-${y}"></div>`;
+      gridHTML += `<div class="cell" id="cell-${x}-${y}"></div>`;
     });
   }
+  
+  grid.insertAdjacentHTML('beforeend', gridHTML); 
 }
 
 function setupAutocomplete(inputId, listId, onSelect) {
@@ -497,11 +478,8 @@ function setupAutocomplete(inputId, listId, onSelect) {
       const val = input.value.trim();
       if (!val) return;
       const match = planets.find(p => p.name.toLowerCase() === val.toLowerCase());
-      if (match) {
-        choosePlanet(match.name);
-      } else {
-        log(`> ERROR: System '${val}' not found in database.`);
-      }
+      if (match) choosePlanet(match.name);
+      else log(`> ERROR: System '${val}' not found in database.`);
     });
   }
 
@@ -520,53 +498,79 @@ function hashCode(str) {
   return Math.abs(hash);
 }
 
-function getPlanetOffset(planetName) {
-  const p = planets.find(p => p.name === planetName);
-  if(!p) return { dx: 0, dy: 0 };
+function recalculateAllOffsets() {
+  offsetCache = {};
+  const sectors = {};
+  
+  planets.forEach(p => {
+    const key = `${p.x}-${p.y}`;
+    if (!sectors[key]) sectors[key] = [];
+    sectors[key].push(p);
+  });
 
-  const peers = planets.filter(other => other.x === p.x && other.y === p.y).sort((a,b) => a.name.localeCompare(b.name));
-  if (peers.length <= 1) {
-    let angle = (hashCode(p.name + "_edge_angle") % 1000) / 1000 * Math.PI * 2;
-    let radius = 12 + ((hashCode(p.name + "_edge_rad") % 1000) / 1000) * 11;
-    return { dx: Math.cos(angle) * radius, dy: Math.sin(angle) * radius };
-  }
-
-  const maxOffset = 22;
-  const minDistance = 7;
-  const placedOffsets = [];
-
-  for (let i = 0; i < peers.length; i++) {
-    const peer = peers[i];
-    let angle = (hashCode(peer.name + "_angle") % 1000) / 1000 * Math.PI * 2;
-    let radius = 6 + (hashCode(peer.name + "_rad") % 1000) / 1000 * (maxOffset - 6);
-    let dx = Math.cos(angle) * radius;
-    let dy = Math.sin(angle) * radius;
-
-    let attempts = 0;
-    let collision = true;
-
-    while (collision && attempts < 30) {
-      collision = false;
-      for (const placed of placedOffsets) {
-        const dist = Math.sqrt(Math.pow(dx - placed.dx, 2) + Math.pow(dy - placed.dy, 2));
-        if (dist < minDistance) {
-          collision = true;
-          dx += (dx - placed.dx) * 0.4 || 0.6;
-          dy += (dy - placed.dy) * 0.4 || 0.6;
-        }
-      }
-      const currentRad = Math.sqrt(dx * dx + dy * dy);
-      if (currentRad > maxOffset) {
-        dx = (dx / currentRad) * maxOffset;
-        dy = (dy / currentRad) * maxOffset;
-      }
-      attempts++;
+  for (const key in sectors) {
+    const peers = sectors[key].sort((a,b) => a.name.localeCompare(b.name));
+    
+    if (peers.length <= 1) {
+      const p = peers[0];
+      let angle = (hashCode(p.name + "_edge_angle") % 1000) / 1000 * Math.PI * 2;
+      let radius = 12 + ((hashCode(p.name + "_edge_rad") % 1000) / 1000) * 11;
+      offsetCache[p.name] = { dx: Math.cos(angle) * radius, dy: Math.sin(angle) * radius };
+      continue;
     }
 
-    if (peer.name === planetName) return { dx, dy };
-    placedOffsets.push({ dx, dy });
+    const maxOffset = 22;
+    const minDistance = 7;
+    const placedOffsets = [];
+
+    for (let i = 0; i < peers.length; i++) {
+      const peer = peers[i];
+      let angle = (hashCode(peer.name + "_angle") % 1000) / 1000 * Math.PI * 2;
+      let radius = 6 + (hashCode(peer.name + "_rad") % 1000) / 1000 * (maxOffset - 6);
+      let dx = Math.cos(angle) * radius;
+      let dy = Math.sin(angle) * radius;
+
+      let attempts = 0;
+      let collision = true;
+
+      while (collision && attempts < 30) {
+        collision = false;
+        for (const placed of placedOffsets) {
+          const dist = Math.hypot(dx - placed.dx, dy - placed.dy);
+          if (dist < minDistance) {
+            collision = true;
+            dx += (dx - placed.dx) * 0.4 || 0.6;
+            dy += (dy - placed.dy) * 0.4 || 0.6;
+          }
+        }
+        const currentRad = Math.hypot(dx, dy);
+        if (currentRad > maxOffset) {
+          dx = (dx / currentRad) * maxOffset;
+          dy = (dy / currentRad) * maxOffset;
+        }
+        attempts++;
+      }
+      placedOffsets.push({ dx, dy });
+      offsetCache[peer.name] = { dx, dy };
+    }
   }
-  return { dx: 0, dy: 0 };
+}
+
+function getPlanetOffset(planetName) {
+  return offsetCache[planetName] || { dx: 0, dy: 0 };
+}
+
+function updateSegmentCounts() {
+  cachedSegmentCounts = {};
+  hyperlanes.forEach(lane => {
+    const routePlanets = lane.planets || [];
+    for (let i = 0; i < routePlanets.length - 1; i++) {
+      const u = routePlanets[i];
+      const v = routePlanets[i+1];
+      const key = (u < v) ? `${u}|${v}` : `${v}|${u}`;
+      cachedSegmentCounts[key] = (cachedSegmentCounts[key] || 0) + 1;
+    }
+  });
 }
 
 function drawGridOverlay() {
@@ -608,18 +612,6 @@ function handlePlanetClick(name) {
   }
 }
 
-function getVisualCenter(planetStr, baseWidth, baseHeight) {
-  const p = planets.find(x => x.name === planetStr);
-  if (!p) return null;
-  const offset = getPlanetOffset(planetStr);
-  const cellWidth = baseWidth / 19;
-  const cellHeight = baseHeight / 21;
-  return {
-    x: letterToNum(p.x) * cellWidth + (cellWidth / 2) + offset.dx,
-    y: (p.y - 1) * cellHeight + (cellHeight / 2) + offset.dy
-  };
-}
-
 function drawCanvas() {
   const canvas = document.getElementById('route-canvas');
   const ctx = canvas.getContext('2d');
@@ -638,20 +630,15 @@ function drawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.scale(dpr, dpr);
 
-  const segmentCounts = {};
-
-  hyperlanes.forEach(lane => {
-    const routePlanets = lane.planets || [];
-    for (let i = 0; i < routePlanets.length - 1; i++) {
-      const u = routePlanets[i];
-      const v = routePlanets[i+1];
-      const start = getVisualCenter(u, baseWidth, baseHeight);
-      const end = getVisualCenter(v, baseWidth, baseHeight);
-      if (start && end) {
-        const key = (u < v) ? `${u}|${v}` : `${v}|${u}`;
-        segmentCounts[key] = (segmentCounts[key] || 0) + 1;
-      }
-    }
+  visualCentersCache = {};
+  const cellWidth = baseWidth / 19;
+  const cellHeight = baseHeight / 21;
+  planets.forEach(p => {
+    const offset = getPlanetOffset(p.name);
+    visualCentersCache[p.name] = {
+      x: letterToNum(p.x) * cellWidth + (cellWidth / 2) + offset.dx,
+      y: (p.y - 1) * cellHeight + (cellHeight / 2) + offset.dy
+    };
   });
 
   hyperlanes.forEach(lane => {
@@ -660,11 +647,12 @@ function drawCanvas() {
     for (let i = 0; i < routePlanets.length - 1; i++) {
       const u = routePlanets[i];
       const v = routePlanets[i+1];
-      const start = getVisualCenter(u, baseWidth, baseHeight);
-      const end = getVisualCenter(v, baseWidth, baseHeight);
+      const start = visualCentersCache[u];
+      const end = visualCentersCache[v];
+      
       if (start && end) {
         const key = (u < v) ? `${u}|${v}` : `${v}|${u}`;
-        const density = segmentCounts[key] || 1;
+        const density = cachedSegmentCounts[key] || 1;
 
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
@@ -687,14 +675,15 @@ function drawCanvas() {
     }
   });
 
-  if (currentBuildingSequence && currentBuildingSequence.length > 1) {
-    ctx.lineWidth = 3.5;
-    ctx.strokeStyle = 'rgba(46, 160, 67, 0.9)';
-    ctx.setLineDash([6, 4]);
+  const drawPathOverlay = (sequence, color, lineDash, width) => {
+    if (!sequence || sequence.length < 2) return;
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.setLineDash(lineDash);
 
-    for (let i = 0; i < currentBuildingSequence.length - 1; i++) {
-      const start = getVisualCenter(currentBuildingSequence[i], baseWidth, baseHeight);
-      const end = getVisualCenter(currentBuildingSequence[i+1], baseWidth, baseHeight);
+    for (let i = 0; i < sequence.length - 1; i++) {
+      const start = visualCentersCache[sequence[i]];
+      const end = visualCentersCache[sequence[i+1]];
       if (start && end) {
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
@@ -703,43 +692,11 @@ function drawCanvas() {
       }
     }
     ctx.setLineDash([]);
-  }
+  };
 
-  if (routeSequence && routeSequence.length > 1) {
-    ctx.lineWidth = 3.5;
-    ctx.strokeStyle = 'rgba(243, 156, 18, 0.7)';
-    ctx.setLineDash([4, 4]);
-
-    for (let i = 0; i < routeSequence.length - 1; i++) {
-      const start = getVisualCenter(routeSequence[i], baseWidth, baseHeight);
-      const end = getVisualCenter(routeSequence[i+1], baseWidth, baseHeight);
-      if (start && end) {
-        ctx.beginPath();
-        ctx.moveTo(start.x, start.y);
-        ctx.lineTo(end.x, end.y);
-        ctx.stroke();
-      }
-    }
-    ctx.setLineDash([]);
-  }
-
-  if (lastRoutePath && lastRoutePath.length > 1) {
-    ctx.lineWidth = 4.0;
-    ctx.strokeStyle = 'rgba(243, 156, 18, 0.95)';
-    ctx.setLineDash([8, 6]);
-
-    for (let i = 0; i < lastRoutePath.length - 1; i++) {
-      const start = getVisualCenter(lastRoutePath[i], baseWidth, baseHeight);
-      const end = getVisualCenter(lastRoutePath[i+1], baseWidth, baseHeight);
-      if (start && end) {
-        ctx.beginPath();
-        ctx.moveTo(start.x, start.y);
-        ctx.lineTo(end.x, end.y);
-        ctx.stroke();
-      }
-    }
-    ctx.setLineDash([]);
-  }
+  drawPathOverlay(currentBuildingSequence, 'rgba(46, 160, 67, 0.9)', [6, 4], 3.5);
+  drawPathOverlay(routeSequence, 'rgba(243, 156, 18, 0.7)', [4, 4], 3.5);
+  drawPathOverlay(lastRoutePath, 'rgba(243, 156, 18, 0.95)', [8, 6], 4.0);
 
   ctx.restore();
 }
@@ -760,80 +717,75 @@ function getUnscaledMousePos(e, canvas) {
 
 function setupCanvasInteraction() {
   const canvas = document.getElementById('route-canvas');
-  const grid = document.getElementById('map-grid');
+  let isMouseProcessing = false;
 
   canvas.addEventListener('mousemove', (e) => {
-    const mouse = getUnscaledMousePos(e, canvas);
-    const mouseX = mouse.x;
-    const mouseY = mouse.y;
-    const baseWidth = grid.clientWidth - 40;
-    const baseHeight = grid.clientHeight - 40;
+    if (isMouseProcessing) return;
+    isMouseProcessing = true;
 
-    let hoveredPlanet = null;
-    for (const p of planets) {
-      const center = getVisualCenter(p.name, baseWidth, baseHeight);
-      if (center) {
-        const dist = Math.hypot(mouseX - center.x, mouseY - center.y);
-        if (dist <= 2) {
-          hoveredPlanet = p;
-          break;
-        }
-      }
-    }
-
-    if (hoveredPlanet) {
-      showPlanetTooltip(e, hoveredPlanet);
-      return;
-    }
-
-    let hoveredLane = null;
-    let minDistance = 8;
-
-    for (const lane of hyperlanes) {
-      const routePlanets = lane.planets || [];
-      for (let i = 0; i < routePlanets.length - 1; i++) {
-        const start = getVisualCenter(routePlanets[i], baseWidth, baseHeight);
-        const end = getVisualCenter(routePlanets[i+1], baseWidth, baseHeight);
-        if (!start || !end) continue;
-
-        const dist = distToSegment({x: mouseX, y: mouseY}, start, end);
-        if (dist < minDistance) {
-          hoveredLane = lane;
-          break;
-        }
-      }
-      if (hoveredLane) break;
-    }
-
-    if (hoveredLane) {
-      showLaneTooltip(e, hoveredLane);
-    } else {
-      hideTooltip();
-    }
+    requestAnimationFrame(() => {
+      processMouseMove(e, canvas);
+      isMouseProcessing = false;
+    });
   });
 
   canvas.addEventListener('click', (e) => {
-    const mouse = getUnscaledMousePos(e, canvas);
-    const mouseX = mouse.x;
-    const mouseY = mouse.y;
-    const baseWidth = grid.clientWidth - 40;
-    const baseHeight = grid.clientHeight - 40;
+    // ABORT: If we dragged the map, ignore the click event
+    if (hasDragged) return;
 
+    const mouse = getUnscaledMousePos(e, canvas);
     for (const p of planets) {
-      const center = getVisualCenter(p.name, baseWidth, baseHeight);
-      if (center) {
-        const dist = Math.hypot(mouseX - center.x, mouseY - center.y);
-        if (dist <= 3) {
-          handlePlanetClick(p.name);
-          return;
-        }
+      const center = visualCentersCache[p.name];
+      if (center && Math.hypot(mouse.x - center.x, mouse.y - center.y) <= 3) {
+        handlePlanetClick(p.name);
+        return;
       }
     }
   });
 
-  canvas.addEventListener('mouseleave', () => {
-    hideTooltip();
-  });
+  canvas.addEventListener('mouseleave', () => hideTooltip());
+}
+
+function processMouseMove(e, canvas) {
+  const mouse = getUnscaledMousePos(e, canvas);
+  const mouseX = mouse.x;
+  const mouseY = mouse.y;
+
+  let hoveredPlanet = null;
+  for (const p of planets) {
+    const center = visualCentersCache[p.name];
+    if (center && Math.hypot(mouseX - center.x, mouseY - center.y) <= 2) {
+      hoveredPlanet = p;
+      break;
+    }
+  }
+
+  if (hoveredPlanet) {
+    showPlanetTooltip(e, hoveredPlanet);
+    return;
+  }
+
+  let hoveredLane = null;
+  let minDistance = 8;
+
+  for (const lane of hyperlanes) {
+    const routePlanets = lane.planets || [];
+    for (let i = 0; i < routePlanets.length - 1; i++) {
+      const start = visualCentersCache[routePlanets[i]];
+      const end = visualCentersCache[routePlanets[i+1]];
+      if (!start || !end) continue;
+
+      const dist = distToSegment({x: mouseX, y: mouseY}, start, end);
+      if (dist < minDistance) {
+        hoveredLane = lane;
+        break;
+      }
+    }
+    if (hoveredLane) break;
+  }
+
+  if (hoveredLane) showLaneTooltip(e, hoveredLane);
+  else hideTooltip();
 }
 
 function distToSegment(p, p1, p2) {
@@ -876,7 +828,6 @@ function showPlanetTooltip(e, planet) {
   <div class="tt-header">${planet.name} ${planet.important ? '&#9733;' : ''}</div>
   <div class="tt-item">Grid Sector: ${planet.x}-${planet.y}</div>
   <div style="color: ${actionColor}; font-size: 0.75em; margin-top: 4px;">${actionText}</div>
-
   `;
   tt.style.display = 'block';
   moveTooltip(e);
@@ -912,10 +863,7 @@ function addPlanet() {
   const y = parseInt(document.getElementById('p-y').value);
   const isImportant = document.getElementById('p-important').checked;
 
-  if(!name) {
-    log("> ERROR: Invalid planet designation.");
-    return;
-  }
+  if(!name) return log("> ERROR: Invalid planet designation.");
 
   const existing = planets.find(p => p.name.toLowerCase() === name.toLowerCase());
   if(existing) {
@@ -934,17 +882,9 @@ function addPlanet() {
 }
 
 function calculateRoute() {
-  if (routeSequence.length < 2) {
-    log("> ERROR: Need at least 2 waypoints to calculate a route.");
-    return;
-  }
-
+  if (routeSequence.length < 2) return log("> ERROR: Need at least 2 waypoints to calculate a route.");
   const hyperClass = parseFloat(document.getElementById('h-class').value) || 1.0;
-
-  if (hyperlanes.length === 0) {
-    log("> ERROR: No hyperlane network found.");
-    return;
-  }
+  if (hyperlanes.length === 0) return log("> ERROR: No hyperlane network found.");
 
   let fullPath = [];
   let totalCost = 0;
@@ -953,10 +893,7 @@ function calculateRoute() {
     const p1 = planets.find(p => p.name.toLowerCase() === routeSequence[i].toLowerCase());
     const p2 = planets.find(p => p.name.toLowerCase() === routeSequence[i + 1].toLowerCase());
 
-    if (!p1 || !p2) {
-      log("> ERROR: Unknown system in waypoint list.");
-      return;
-    }
+    if (!p1 || !p2) return log("> ERROR: Unknown system in waypoint list.");
     if (p1.name === p2.name) continue;
 
     const { path: legPath, cost: legCost } = findShortestPath(p1.name, p2.name);
@@ -972,10 +909,7 @@ function calculateRoute() {
     totalCost += legCost;
   }
 
-  if (fullPath.length < 2) {
-    log("> ERROR: Waypoints resolved to a single system - nowhere to jump to.");
-    return;
-  }
+  if (fullPath.length < 2) return log("> ERROR: Waypoints resolved to a single system - nowhere to jump to.");
 
   const baseTimeHrs = 12;
   const travelTimeHrs = totalCost * baseTimeHrs * hyperClass;
@@ -993,16 +927,12 @@ function calculateRoute() {
   `> EST. TRAVEL TIME: <span style="color:#fff">${d} Days, ${h} Hrs</span>`);
 
   lastRoutePath = fullPath;
-
   routeSequence = [];
   document.getElementById('route-sequence').value = '';
-
   drawCanvas();
 }
 
-function log(msg) {
-  document.getElementById('output-log').innerHTML = msg;
-}
+function log(msg) { document.getElementById('output-log').innerHTML = msg; }
 
 function exportData() {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(planets, null, 2));
@@ -1025,9 +955,7 @@ function importData(event) {
         refreshMapData();
         log("> planets.json LOADED SUCCESSFULLY");
       }
-    } catch (err) {
-      log("> ERROR: CORRUPTED DATA FILE");
-    }
+    } catch (err) { log("> ERROR: CORRUPTED DATA FILE"); }
   };
   reader.readAsText(file);
 }
@@ -1058,12 +986,11 @@ function importHyperlanes(event) {
           }
           return item;
         });
+        updateSegmentCounts();
         drawCanvas();
         log("> hyperlane-routes.json LOADED SUCCESSFULLY");
       }
-    } catch (err) {
-      log("> ERROR: CORRUPTED ROUTE DATA FILE");
-    }
+    } catch (err) { log("> ERROR: CORRUPTED ROUTE DATA FILE"); }
   };
   reader.readAsText(file);
 }
