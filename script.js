@@ -120,6 +120,16 @@ async function loadHyperlanesData() {
   }
 }
 
+let redrawScheduled = false;
+function scheduleCanvasRedraw() {
+  if (redrawScheduled) return;
+  redrawScheduled = true;
+  requestAnimationFrame(() => {
+    redrawScheduled = false;
+    drawCanvas();
+  });
+}
+
 function setupZoomAndPan() {
   const viewport = document.getElementById('map-viewport');
 
@@ -129,6 +139,7 @@ function setupZoomAndPan() {
     if (e.deltaY < 0) scale *= (1 + zoomIntensity);
     else scale /= (1 + zoomIntensity);
     updateTransform();
+    scheduleCanvasRedraw();
   }, { passive: false });
 
   viewport.addEventListener('mousedown', (e) => {
@@ -621,26 +632,54 @@ function drawCanvas() {
   const baseHeight = grid.clientHeight - 40;
   const dpr = window.devicePixelRatio || 1;
 
-  if (canvas.width !== baseWidth * dpr || canvas.height !== baseHeight * dpr) {
-    canvas.width = baseWidth * dpr;
-    canvas.height = baseHeight * dpr;
+  // The map zooms via a CSS transform: scale() on the whole grid (canvas
+  // included) rather than by resizing the layout. A CSS transform stretches
+  // whatever bitmap is already there - so a canvas only ever rendered at its
+  // base (unzoomed) resolution gets visibly blockier the further you zoom
+  // in, since the browser is upscaling a fixed-resolution image. Rendering
+  // at dpr * scale instead means the bitmap already has as many pixels as
+  // the current zoom level will display, so the transform has nothing left
+  // to stretch - it lines up 1:1 with real device pixels.
+  const MAX_CANVAS_DIM = 8192; // stay well under browser canvas size limits
+  let renderScale = dpr * scale;
+  if (baseWidth * renderScale > MAX_CANVAS_DIM || baseHeight * renderScale > MAX_CANVAS_DIM) {
+    renderScale = Math.min(MAX_CANVAS_DIM / baseWidth, MAX_CANVAS_DIM / baseHeight);
+  }
+
+  const targetWidth = Math.round(baseWidth * renderScale);
+  const targetHeight = Math.round(baseHeight * renderScale);
+  if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
   }
 
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.scale(dpr, dpr);
+  ctx.scale(renderScale, renderScale);
+
+  // Smoothing back on: this only affects drawImage-style scaling, not path
+  // strokes (canvas lines are always anti-aliased regardless), and turning
+  // it off bought nothing for the pixelation here while making thin lines
+  // look harsher than necessary.
+  ctx.imageSmoothingEnabled = true;
+  ctx.webkitImageSmoothingEnabled = true;
+  ctx.mozImageSmoothingEnabled = true;
+  ctx.msImageSmoothingEnabled = true;
 
   visualCentersCache = {};
   const cellWidth = baseWidth / 19;
   const cellHeight = baseHeight / 21;
+
+  // Snap visual centers to sharp pixel boundaries (+ 0.5 alignment)
   planets.forEach(p => {
     const offset = getPlanetOffset(p.name);
     visualCentersCache[p.name] = {
-      x: letterToNum(p.x) * cellWidth + (cellWidth / 2) + offset.dx,
-      y: (p.y - 1) * cellHeight + (cellHeight / 2) + offset.dy
+      x: Math.round(letterToNum(p.x) * cellWidth + (cellWidth / 2) + offset.dx) + 0.5,
+                  y: Math.round((p.y - 1) * cellHeight + (cellHeight / 2) + offset.dy) + 0.5
     };
   });
 
+  // 1. Render Standard and Named/Custom Hyperlanes Crisp
   hyperlanes.forEach(lane => {
     const routePlanets = lane.planets || [];
     const isCustom = lane.isCustom;
@@ -649,7 +688,7 @@ function drawCanvas() {
       const v = routePlanets[i+1];
       const start = visualCentersCache[u];
       const end = visualCentersCache[v];
-      
+
       if (start && end) {
         const key = (u < v) ? `${u}|${v}` : `${v}|${u}`;
         const density = cachedSegmentCounts[key] || 1;
@@ -659,15 +698,16 @@ function drawCanvas() {
         ctx.lineTo(end.x, end.y);
 
         if (isCustom) {
-          ctx.lineWidth = 2.5;
-          ctx.strokeStyle = 'rgba(188, 19, 254, 0.85)';
+          // Named/Custom Hyperlanes (Sharp & Distinct)
+          ctx.lineWidth = 2.0;
+          ctx.strokeStyle = 'rgba(188, 19, 254, 1.0)';
         } else {
           if (density > 1) {
-            ctx.lineWidth = 3.0 + density;
-            ctx.strokeStyle = 'rgba(88, 166, 255, 0.55)';
+            ctx.lineWidth = 2.5 + (density * 0.5);
+            ctx.strokeStyle = 'rgba(88, 166, 255, 0.75)';
           } else {
-            ctx.lineWidth = 1.8;
-            ctx.strokeStyle = 'rgba(88, 166, 255, 0.3)';
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(88, 166, 255, 0.5)';
           }
         }
         ctx.stroke();
@@ -675,6 +715,7 @@ function drawCanvas() {
     }
   });
 
+  // 2. Render Plotted Courses and Waypoint Strings Crisp
   const drawPathOverlay = (sequence, color, lineDash, width) => {
     if (!sequence || sequence.length < 2) return;
     ctx.lineWidth = width;
@@ -694,9 +735,9 @@ function drawCanvas() {
     ctx.setLineDash([]);
   };
 
-  drawPathOverlay(currentBuildingSequence, 'rgba(46, 160, 67, 0.9)', [6, 4], 3.5);
-  drawPathOverlay(routeSequence, 'rgba(243, 156, 18, 0.7)', [4, 4], 3.5);
-  drawPathOverlay(lastRoutePath, 'rgba(243, 156, 18, 0.95)', [8, 6], 4.0);
+  drawPathOverlay(currentBuildingSequence, 'rgba(46, 160, 67, 1.0)', [6, 4], 3.0);
+  drawPathOverlay(routeSequence, 'rgba(243, 156, 18, 0.9)', [4, 4], 3.0);
+  drawPathOverlay(lastRoutePath, 'rgba(243, 156, 18, 1.0)', [8, 6], 3.5);
 
   ctx.restore();
 }
