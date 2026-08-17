@@ -311,14 +311,14 @@ button:hover {
 }
 
 #route-canvas {
-  position: absolute;
-  top: 40px;
-  left: 40px;
-  width: calc(100% - 40px);
-  height: calc(100% - 40px);
-  pointer-events: auto;
-  z-index: 15;
-  cursor: default;
+position: absolute;
+top: 40px;
+left: 40px;
+width: calc(100% - 40px);
+height: calc(100% - 40px);
+pointer-events: auto;
+z-index: 5; /* Lowered from 15 to 5 so hyperlanes render below planet markers (z-index: 10) and labels (z-index: 20) */
+cursor: default;
 }
 
 #tooltip {
