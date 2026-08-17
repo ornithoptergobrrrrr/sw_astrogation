@@ -584,6 +584,26 @@ function updateSegmentCounts() {
   });
 }
 
+function getPlanetCenter(planetElementId, canvasElement) {
+  const planetElement = document.getElementById(planetElementId);
+  if (!planetElement) return null;
+
+  // Target the visual circle. If your HTML uses a specific class for the circle
+  // (like '.dot' or '.planet-circle'), replace '.planet-dot' with that class.
+  // If the element itself is just the circle, it falls back to planetElement.
+  const dot = planetElement.querySelector('.planet-dot') || planetElement;
+
+  const dotRect = dot.getBoundingClientRect();
+  const canvasRect = canvasElement.getBoundingClientRect();
+
+  // Calculate the exact center relative to the canvas in CSS pixels
+  // Because your canvas context is scaled (ctx.scale), we use raw CSS pixels.
+  const x = (dotRect.left - canvasRect.left) + (dotRect.width / 2);
+  const y = (dotRect.top - canvasRect.top) + (dotRect.height / 2);
+
+  return { x, y };
+}
+
 function drawGridOverlay() {
   document.querySelectorAll('.planet-marker, .persistent-label').forEach(e => e.remove());
 
@@ -593,6 +613,8 @@ function drawGridOverlay() {
 
     const marker = document.createElement('div');
     marker.className = 'planet-marker';
+    // --- ADDED: Store the name on the visual dot so the canvas can track it ---
+    marker.dataset.planetName = p.name;
 
     const offset = getPlanetOffset(p.name);
     marker.style.marginLeft = `${offset.dx}px`;
@@ -632,15 +654,7 @@ function drawCanvas() {
   const baseHeight = grid.clientHeight - 40;
   const dpr = window.devicePixelRatio || 1;
 
-  // The map zooms via a CSS transform: scale() on the whole grid (canvas
-  // included) rather than by resizing the layout. A CSS transform stretches
-  // whatever bitmap is already there - so a canvas only ever rendered at its
-  // base (unzoomed) resolution gets visibly blockier the further you zoom
-  // in, since the browser is upscaling a fixed-resolution image. Rendering
-  // at dpr * scale instead means the bitmap already has as many pixels as
-  // the current zoom level will display, so the transform has nothing left
-  // to stretch - it lines up 1:1 with real device pixels.
-  const MAX_CANVAS_DIM = 8192; // stay well under browser canvas size limits
+  const MAX_CANVAS_DIM = 8192;
   let renderScale = dpr * scale;
   if (baseWidth * renderScale > MAX_CANVAS_DIM || baseHeight * renderScale > MAX_CANVAS_DIM) {
     renderScale = Math.min(MAX_CANVAS_DIM / baseWidth, MAX_CANVAS_DIM / baseHeight);
@@ -657,27 +671,56 @@ function drawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.scale(renderScale, renderScale);
 
-  // Smoothing back on: this only affects drawImage-style scaling, not path
-  // strokes (canvas lines are always anti-aliased regardless), and turning
-  // it off bought nothing for the pixelation here while making thin lines
-  // look harsher than necessary.
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
   ctx.imageSmoothingEnabled = true;
   ctx.webkitImageSmoothingEnabled = true;
   ctx.mozImageSmoothingEnabled = true;
   ctx.msImageSmoothingEnabled = true;
 
   visualCentersCache = {};
+
+  // ---- DYNAMIC DOM CENTER CALCULATION ----
+  const canvasRect = canvas.getBoundingClientRect();
+  const screenCenterX = canvasRect.left + canvasRect.width / 2;
+  const screenCenterY = canvasRect.top + canvasRect.height / 2;
+
+  // Map markers for rapid lookup
+  const markers = document.querySelectorAll('.planet-marker');
+  const markerMap = {};
+  markers.forEach(m => {
+    if (m.dataset.planetName) {
+      markerMap[m.dataset.planetName] = m;
+    }
+  });
+
   const cellWidth = baseWidth / 19;
   const cellHeight = baseHeight / 21;
 
-  // Snap visual centers to sharp pixel boundaries (+ 0.5 alignment)
   planets.forEach(p => {
-    const offset = getPlanetOffset(p.name);
-    visualCentersCache[p.name] = {
-      x: Math.round(letterToNum(p.x) * cellWidth + (cellWidth / 2) + offset.dx) + 0.5,
+    const marker = markerMap[p.name];
+    if (marker) {
+      // Find the visual dot on the screen
+      const rect = marker.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      // Un-scale the coordinates back to base canvas space
+      visualCentersCache[p.name] = {
+        x: Math.round((baseWidth / 2) + (cx - screenCenterX) / scale) + 0.5,
+                  y: Math.round((baseHeight / 2) + (cy - screenCenterY) / scale) + 0.5
+      };
+    } else {
+      // Fallback mathematical calculation just in case the dot isn't rendered
+      const offset = getPlanetOffset(p.name);
+      visualCentersCache[p.name] = {
+        x: Math.round(letterToNum(p.x) * cellWidth + (cellWidth / 2) + offset.dx) + 0.5,
                   y: Math.round((p.y - 1) * cellHeight + (cellHeight / 2) + offset.dy) + 0.5
-    };
+      };
+    }
   });
+  // ----------------------------------------
 
   // 1. Render Standard and Named/Custom Hyperlanes Crisp
   hyperlanes.forEach(lane => {
@@ -698,7 +741,6 @@ function drawCanvas() {
         ctx.lineTo(end.x, end.y);
 
         if (isCustom) {
-          // Named/Custom Hyperlanes (Sharp & Distinct)
           ctx.lineWidth = 2.0;
           ctx.strokeStyle = 'rgba(188, 19, 254, 1.0)';
         } else {
