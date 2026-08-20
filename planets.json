@@ -1999,6 +1999,7 @@
   { "name": "Zaria", "x": "L", "y": 17, "important": false },
   { "name": "Zchtek", "x": "R", "y": 8, "important": false },
   { "name": "Zebitrope", "x": "T", "y": 8, "important": false },
+  { "name": "Zeffo", "x": "M", "y": 3, "important": false },
   { "name": "ZeHeth", "x": "N", "y": 16, "important": false },
   { "name": "Zeltros", "x": "O", "y": 10, "important": false },
   { "name": "Zenox Cluster", "x": "K", "y": 13, "important": false },
