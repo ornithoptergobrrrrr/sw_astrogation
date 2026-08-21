@@ -88,6 +88,22 @@
     "isCustom": true
   },
   {
+    "name": "Mugaar - Thull's Vault Route",
+    "planets": [
+      "Mugaar",
+      "Thull's Vault"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Malador - Veron Route",
+    "planets": [
+      "Malador",
+      "Veron"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Juvex - Vulcar Route",
     "planets": [
       "Juvex",
@@ -128,14 +144,6 @@
     "isCustom": false
   },
   {
-    "name": "Daruvvia - Stalsinek Route",
-    "planets": [
-      "Daruvvia",
-      "Stalsinek"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Daruvvia - Katarr Route",
     "planets": [
       "Daruvvia",
@@ -144,18 +152,10 @@
     "isCustom": false
   },
   {
-    "name": "Katarr - Stalsinek Route",
+    "name": "Hapes - Onderon Route",
     "planets": [
-      "Katarr",
-      "Stalsinek"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Rainboh - Selab Route",
-    "planets": [
-      "Rainboh",
-      "Selab"
+      "Hapes",
+      "Onderon"
     ],
     "isCustom": false
   },
@@ -264,6 +264,14 @@
     "isCustom": false
   },
   {
+    "name": "Charubah - Telkur Station Route",
+    "planets": [
+      "Charubah",
+      "Telkur Station"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Mexeluine - Saila Na Route",
     "planets": [
       "Mexeluine",
@@ -276,14 +284,6 @@
     "planets": [
       "Denab",
       "Pergitor"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Hapes - Onderon Route",
-    "planets": [
-      "Hapes",
-      "Onderon"
     ],
     "isCustom": false
   },
@@ -304,14 +304,6 @@
     "isCustom": false
   },
   {
-    "name": "Calfa - Roqoo Depot Route",
-    "planets": [
-      "Calfa",
-      "Roqoo Depot"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Alland - Worru'du Route",
     "planets": [
       "Alland",
@@ -328,18 +320,18 @@
     "isCustom": false
   },
   {
-    "name": "Trindello - UR-8827 Route",
+    "name": "Rynmar - Sargon Route",
     "planets": [
-      "Trindello",
-      "UR-8827"
+      "Rynmar",
+      "Sargon"
     ],
     "isCustom": false
   },
   {
-    "name": "Ket - Tumani Route",
+    "name": "Trindello - UR-8827 Route",
     "planets": [
-      "Ket",
-      "Tumani"
+      "Trindello",
+      "UR-8827"
     ],
     "isCustom": false
   },
@@ -384,18 +376,18 @@
     "isCustom": false
   },
   {
-    "name": "Farnica - Terephon Route",
-    "planets": [
-      "Farnica",
-      "Terephon"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Phindar - Tertiary Feswe Route",
     "planets": [
       "Phindar",
       "Tertiary Feswe"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Naalol - Thermon Route",
+    "planets": [
+      "Naalol",
+      "Thermon"
     ],
     "isCustom": false
   },
@@ -416,10 +408,10 @@
     "isCustom": false
   },
   {
-    "name": "Illoud - Ut Route",
+    "name": "Rainboh - Zalori Route",
     "planets": [
-      "Illoud",
-      "Ut"
+      "Rainboh",
+      "Zalori"
     ],
     "isCustom": false
   },
@@ -432,6 +424,14 @@
     "isCustom": false
   },
   {
+    "name": "Gorse - Selab Route",
+    "planets": [
+      "Gorse",
+      "Selab"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Brodo Asogi - Comra Route",
     "planets": [
       "Brodo Asogi",
@@ -440,10 +440,34 @@
     "isCustom": false
   },
   {
+    "name": "Dxun - Ut Route",
+    "planets": [
+      "Dxun",
+      "Ut"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Argai Minor - Shelkonwa Route",
     "planets": [
       "Argai Minor",
       "Shelkonwa"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Illoud - Modus Route",
+    "planets": [
+      "Illoud",
+      "Modus"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Cheruba - Phelope Route",
+    "planets": [
+      "Cheruba",
+      "Phelope"
     ],
     "isCustom": false
   },
@@ -476,6 +500,14 @@
     "planets": [
       "Enisca",
       "Yag'Dhul"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Donovia - Sennex Route",
+    "planets": [
+      "Donovia",
+      "Sennex"
     ],
     "isCustom": false
   },
@@ -536,6 +568,14 @@
     "isCustom": false
   },
   {
+    "name": "Hestria - Usnia Route",
+    "planets": [
+      "Hestria",
+      "Usnia"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Junkfort Station - Maldra Route",
     "planets": [
       "Junkfort Station",
@@ -560,6 +600,14 @@
     "isCustom": false
   },
   {
+    "name": "k'Farri - Stalsinek Route",
+    "planets": [
+      "k'Farri",
+      "Stalsinek"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Kroctar - Ylix Route",
     "planets": [
       "Kroctar",
@@ -568,42 +616,10 @@
     "isCustom": false
   },
   {
-    "name": "Dramassia - Thull's Vault Route",
-    "planets": [
-      "Dramassia",
-      "Thull's Vault"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Dreena - Orelon Route",
-    "planets": [
-      "Dreena",
-      "Orelon"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Aradia - Xorth Route",
     "planets": [
       "Aradia",
       "Xorth"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Donovia - Shedu Maad Route",
-    "planets": [
-      "Donovia",
-      "Shedu Maad"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Nothoiin - Tokmia Route",
-    "planets": [
-      "Nothoiin",
-      "Tokmia"
     ],
     "isCustom": false
   },
@@ -640,14 +656,6 @@
     "isCustom": false
   },
   {
-    "name": "Mugaar - Thull's Vault Route",
-    "planets": [
-      "Mugaar",
-      "Thull's Vault"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Chiron - Zebitrope Route",
     "planets": [
       "Chiron",
@@ -672,6 +680,14 @@
     "isCustom": false
   },
   {
+    "name": "Tyluun - Velga Route",
+    "planets": [
+      "Tyluun",
+      "Velga"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Abo Dreth - Tothis Route",
     "planets": [
       "Abo Dreth",
@@ -684,22 +700,6 @@
     "planets": [
       "Cmaoli Di",
       "Phaegon_III"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Modus - Ut Route",
-    "planets": [
-      "Modus",
-      "Ut"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Chosper - Sivoria Route",
-    "planets": [
-      "Chosper",
-      "Sivoria"
     ],
     "isCustom": false
   },
@@ -736,26 +736,10 @@
     "isCustom": false
   },
   {
-    "name": "Ossiathora - Tarsa Route",
-    "planets": [
-      "Ossiathora",
-      "Tarsa"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Alui - Farstine Route",
     "planets": [
       "Alui",
       "Farstine"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Archais - Tinta Route",
-    "planets": [
-      "Archais",
-      "Tinta"
     ],
     "isCustom": false
   },
@@ -784,18 +768,18 @@
     "isCustom": false
   },
   {
-    "name": "Keskin - Varonat Route",
+    "name": "Jodaka - Wodan Route",
     "planets": [
-      "Keskin",
-      "Varonat"
+      "Jodaka",
+      "Wodan"
     ],
     "isCustom": false
   },
   {
-    "name": "Sennex - Shedu Maad Route",
+    "name": "Keskin - Varonat Route",
     "planets": [
-      "Sennex",
-      "Shedu Maad"
+      "Keskin",
+      "Varonat"
     ],
     "isCustom": false
   },
@@ -816,6 +800,14 @@
     "isCustom": false
   },
   {
+    "name": "Daruvvia - Reboam Route",
+    "planets": [
+      "Daruvvia",
+      "Reboam"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Joodrudda - Orron Route",
     "planets": [
       "Joodrudda",
@@ -828,14 +820,6 @@
     "planets": [
       "Fengrine",
       "Kalgo"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Echnos - Thermon Route",
-    "planets": [
-      "Echnos",
-      "Thermon"
     ],
     "isCustom": false
   },
@@ -856,10 +840,10 @@
     "isCustom": false
   },
   {
-    "name": "Gorse - Thrakia Route",
+    "name": "Farnica - Nantuker Route",
     "planets": [
-      "Gorse",
-      "Thrakia"
+      "Farnica",
+      "Nantuker"
     ],
     "isCustom": false
   },
@@ -928,6 +912,14 @@
     "isCustom": false
   },
   {
+    "name": "Nazzri - Shedu Maad Route",
+    "planets": [
+      "Nazzri",
+      "Shedu Maad"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Dilonexa - Gand Route",
     "planets": [
       "Dilonexa",
@@ -936,10 +928,26 @@
     "isCustom": false
   },
   {
+    "name": "Dxun - Tumani Route",
+    "planets": [
+      "Dxun",
+      "Tumani"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Deminol - Ord Ibanna Route",
     "planets": [
       "Deminol",
       "Ord Ibanna"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Ket - Zadaria Route",
+    "planets": [
+      "Ket",
+      "Zadaria"
     ],
     "isCustom": false
   },
@@ -968,26 +976,10 @@
     "isCustom": false
   },
   {
-    "name": "Manress - Rbollea Route",
-    "planets": [
-      "Manress",
-      "Rbollea"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Ferro - Ord Radama Route",
     "planets": [
       "Ferro",
       "Ord Radama"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "k'Farri - Theselon Route",
-    "planets": [
-      "k'Farri",
-      "Theselon"
     ],
     "isCustom": false
   },
@@ -1000,18 +992,18 @@
     "isCustom": false
   },
   {
-    "name": "Malador - Veron Route",
-    "planets": [
-      "Malador",
-      "Veron"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Kanaver - Nuswatta Route",
     "planets": [
       "Kanaver",
       "Nuswatta"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Deminol - Selenius Route",
+    "planets": [
+      "Deminol",
+      "Selenius"
     ],
     "isCustom": false
   },
@@ -1028,14 +1020,6 @@
     "planets": [
       "Najiba",
       "Siskeen"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Grizmallt - Tanjay Route",
-    "planets": [
-      "Grizmallt",
-      "Tanjay"
     ],
     "isCustom": false
   },
@@ -1060,14 +1044,6 @@
     "planets": [
       "Doldur",
       "Rintonne"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Deminol - Selenius Route",
-    "planets": [
-      "Deminol",
-      "Selenius"
     ],
     "isCustom": false
   },
@@ -1100,22 +1076,6 @@
     "planets": [
       "Polmanar",
       "Shoon"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Charubah - Telkur Station Route",
-    "planets": [
-      "Charubah",
-      "Telkur Station"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Andalia - Zalori Route",
-    "planets": [
-      "Andalia",
-      "Zalori"
     ],
     "isCustom": false
   },
@@ -1160,14 +1120,6 @@
     "isCustom": false
   },
   {
-    "name": "Jendorn - Telkur Station Route",
-    "planets": [
-      "Jendorn",
-      "Telkur Station"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Adoris - Chryya Route",
     "planets": [
       "Adoris",
@@ -1180,6 +1132,14 @@
     "planets": [
       "Antiquity",
       "Eiattu"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Nothoiin - Tokmia Route",
+    "planets": [
+      "Nothoiin",
+      "Tokmia"
     ],
     "isCustom": false
   },
@@ -1256,14 +1216,6 @@
     "isCustom": false
   },
   {
-    "name": "Maires - Vergill Route",
-    "planets": [
-      "Maires",
-      "Vergill"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Neelanon - Yetoom Route",
     "planets": [
       "Neelanon",
@@ -1280,6 +1232,14 @@
     "isCustom": false
   },
   {
+    "name": "Maya Kovel - UR-9353 Route",
+    "planets": [
+      "Maya Kovel",
+      "UR-9353"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Ison - Orn Kios Route",
     "planets": [
       "Ison",
@@ -1292,6 +1252,14 @@
     "planets": [
       "Cantonica",
       "Vaynai"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Chosper - Tinta Route",
+    "planets": [
+      "Chosper",
+      "Tinta"
     ],
     "isCustom": false
   },
@@ -1352,14 +1320,6 @@
     "isCustom": false
   },
   {
-    "name": "Nantuker - Terephon Route",
-    "planets": [
-      "Nantuker",
-      "Terephon"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Calus - Thyferra Route",
     "planets": [
       "Calus",
@@ -1392,6 +1352,14 @@
     "isCustom": false
   },
   {
+    "name": "Baldavia - Theselon Route",
+    "planets": [
+      "Baldavia",
+      "Theselon"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Craci - Nicht Ka Route",
     "planets": [
       "Craci",
@@ -1404,22 +1372,6 @@
     "planets": [
       "Cargamalis",
       "Kirtarkin"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Orelon - Talcharaim Route",
-    "planets": [
-      "Orelon",
-      "Talcharaim"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Hestria - Usnia Route",
-    "planets": [
-      "Hestria",
-      "Usnia"
     ],
     "isCustom": false
   },
@@ -1472,6 +1424,14 @@
     "isCustom": false
   },
   {
+    "name": "Harterra - Vergill Route",
+    "planets": [
+      "Harterra",
+      "Vergill"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Skartis - Tekurr'k Route",
     "planets": [
       "Skartis",
@@ -1520,10 +1480,34 @@
     "isCustom": false
   },
   {
+    "name": "Dramassia - Mugaar Route",
+    "planets": [
+      "Dramassia",
+      "Mugaar"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Dramassia - Thull's Vault Route",
+    "planets": [
+      "Dramassia",
+      "Thull's Vault"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Norah - Roona Route",
     "planets": [
       "Norah",
       "Roona"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Archais - Talcharaim Route",
+    "planets": [
+      "Archais",
+      "Talcharaim"
     ],
     "isCustom": false
   },
@@ -1536,18 +1520,18 @@
     "isCustom": false
   },
   {
-    "name": "Pirin - Tinta Route",
-    "planets": [
-      "Pirin",
-      "Tinta"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Darkknell - Xagobah Route",
     "planets": [
       "Darkknell",
       "Xagobah"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Divora - Millinar Route",
+    "planets": [
+      "Divora",
+      "Millinar"
     ],
     "isCustom": false
   },
@@ -1736,14 +1720,6 @@
     "isCustom": false
   },
   {
-    "name": "Nazzri - Sennex Route",
-    "planets": [
-      "Nazzri",
-      "Sennex"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Angratha - Bith Route",
     "planets": [
       "Angratha",
@@ -1800,6 +1776,14 @@
     "isCustom": false
   },
   {
+    "name": "Pirin - Talcharaim Route",
+    "planets": [
+      "Pirin",
+      "Talcharaim"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Dantooine - Yaga Minor Route",
     "planets": [
       "Dantooine",
@@ -1820,6 +1804,14 @@
     "planets": [
       "Mev",
       "Vulcar"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Allyuen - Zhanox Route",
+    "planets": [
+      "Allyuen",
+      "Zhanox"
     ],
     "isCustom": false
   },
@@ -1876,6 +1868,14 @@
     "planets": [
       "Jovan",
       "Kromus"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Dreena - Orelon Route",
+    "planets": [
+      "Dreena",
+      "Orelon"
     ],
     "isCustom": false
   },
@@ -2000,6 +2000,14 @@
     "isCustom": false
   },
   {
+    "name": "Nantuker - Terephon Route",
+    "planets": [
+      "Nantuker",
+      "Terephon"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Kwenn - Uogo'cor Route",
     "planets": [
       "Kwenn",
@@ -2012,14 +2020,6 @@
     "planets": [
       "Rulaar",
       "Valorsi"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Maya Kovel - UR-9353 Route",
-    "planets": [
-      "Maya Kovel",
-      "UR-9353"
     ],
     "isCustom": false
   },
@@ -2128,22 +2128,6 @@
     "isCustom": false
   },
   {
-    "name": "Divora - Millinar Route",
-    "planets": [
-      "Divora",
-      "Millinar"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Faro - Zadaria Route",
-    "planets": [
-      "Faro",
-      "Zadaria"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Arcan - Jaminere Route",
     "planets": [
       "Arcan",
@@ -2192,10 +2176,10 @@
     "isCustom": false
   },
   {
-    "name": "Dxun - Porus Vida Route",
+    "name": "Ossiathora - Tarsa Route",
     "planets": [
-      "Dxun",
-      "Porus Vida"
+      "Ossiathora",
+      "Tarsa"
     ],
     "isCustom": false
   },
@@ -2204,14 +2188,6 @@
     "planets": [
       "Boro-borosa",
       "Yhifar"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Darlyn Boda - Zephry Route",
-    "planets": [
-      "Darlyn Boda",
-      "Zephry"
     ],
     "isCustom": false
   },
@@ -2244,14 +2220,6 @@
     "planets": [
       "Scipio",
       "Vykos"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Jovaria - Zadaria Route",
-    "planets": [
-      "Jovaria",
-      "Zadaria"
     ],
     "isCustom": false
   },
@@ -2336,10 +2304,10 @@
     "isCustom": false
   },
   {
-    "name": "Ambria - Vergill Route",
+    "name": "Gorse - Thrakia Route",
     "planets": [
-      "Ambria",
-      "Vergill"
+      "Gorse",
+      "Thrakia"
     ],
     "isCustom": false
   },
@@ -2420,6 +2388,22 @@
     "planets": [
       "Jovaria",
       "Novi"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Gallinore - Shedu Maad Route",
+    "planets": [
+      "Gallinore",
+      "Shedu Maad"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Darlyn Boda - Zephry Route",
+    "planets": [
+      "Darlyn Boda",
+      "Zephry"
     ],
     "isCustom": false
   },
@@ -2528,14 +2512,6 @@
     "isCustom": false
   },
   {
-    "name": "Lalmy'ash - Zalori Route",
-    "planets": [
-      "Lalmy'ash",
-      "Zalori"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Presbalin - Serenno Route",
     "planets": [
       "Presbalin",
@@ -2548,6 +2524,14 @@
     "planets": [
       "Botajef",
       "Skorrupon"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Trassitan - Zeffo Route",
+    "planets": [
+      "Trassitan",
+      "Zeffo"
     ],
     "isCustom": false
   },
@@ -2568,10 +2552,26 @@
     "isCustom": false
   },
   {
+    "name": "Grizmallt - Tanjay Route",
+    "planets": [
+      "Grizmallt",
+      "Tanjay"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Maridun - Trinovat Route",
     "planets": [
       "Maridun",
       "Trinovat"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Manress - Rbollea Route",
+    "planets": [
+      "Manress",
+      "Rbollea"
     ],
     "isCustom": false
   },
@@ -2592,14 +2592,6 @@
     "isCustom": false
   },
   {
-    "name": "Reboam - Valgauth Route",
-    "planets": [
-      "Reboam",
-      "Valgauth"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Argus - Leritor Route",
     "planets": [
       "Argus",
@@ -2612,14 +2604,6 @@
     "planets": [
       "Ambria",
       "Jovaria"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Charubah - Sargon Route",
-    "planets": [
-      "Charubah",
-      "Sargon"
     ],
     "isCustom": false
   },
@@ -2668,6 +2652,14 @@
     "planets": [
       "Basilisk",
       "Raithal"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Charubah - Sivoria Route",
+    "planets": [
+      "Charubah",
+      "Sivoria"
     ],
     "isCustom": false
   },
@@ -2752,6 +2744,22 @@
     "isCustom": false
   },
   {
+    "name": "Berri - Porus Vida Route",
+    "planets": [
+      "Berri",
+      "Porus Vida"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Ediorung - Roqoo Depot Route",
+    "planets": [
+      "Ediorung",
+      "Roqoo Depot"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Hynah - Mogoshyn Route",
     "planets": [
       "Hynah",
@@ -2804,6 +2812,14 @@
     "planets": [
       "Dalcretti",
       "Rearqu Cluster"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Milagro - New Cov Route",
+    "planets": [
+      "Milagro",
+      "New Cov"
     ],
     "isCustom": false
   },
@@ -2904,6 +2920,14 @@
     "isCustom": false
   },
   {
+    "name": "Porus Vida - Wodan Route",
+    "planets": [
+      "Porus Vida",
+      "Wodan"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Devon - Lah'mu Route",
     "planets": [
       "Devon",
@@ -2912,10 +2936,10 @@
     "isCustom": false
   },
   {
-    "name": "Korev VII - Wodan Route",
+    "name": "Jendorn - Theselon Route",
     "planets": [
-      "Korev VII",
-      "Wodan"
+      "Jendorn",
+      "Theselon"
     ],
     "isCustom": false
   },
@@ -3040,14 +3064,6 @@
     "isCustom": false
   },
   {
-    "name": "Phelope - Wodan Route",
-    "planets": [
-      "Phelope",
-      "Wodan"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Berrol's Donn - Mexeluine Route",
     "planets": [
       "Berrol's Donn",
@@ -3128,6 +3144,14 @@
     "isCustom": false
   },
   {
+    "name": "Jendorn - Telkur Station Route",
+    "planets": [
+      "Jendorn",
+      "Telkur Station"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Hillindor - Roundtree Route",
     "planets": [
       "Hillindor",
@@ -3172,14 +3196,6 @@
     "planets": [
       "Hijado",
       "Kiva"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Allyuen - Zhanox Route",
-    "planets": [
-      "Allyuen",
-      "Zhanox"
     ],
     "isCustom": false
   },
@@ -3304,6 +3320,14 @@
     "isCustom": false
   },
   {
+    "name": "Sennex - Shedu Maad Route",
+    "planets": [
+      "Sennex",
+      "Shedu Maad"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Farrfin - Soun Route",
     "planets": [
       "Farrfin",
@@ -3368,22 +3392,6 @@
     "isCustom": false
   },
   {
-    "name": "Chryya - Thermon Route",
-    "planets": [
-      "Chryya",
-      "Thermon"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Bith - Velga Route",
-    "planets": [
-      "Bith",
-      "Velga"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Quarzite - Sanjin Route",
     "planets": [
       "Quarzite",
@@ -3400,14 +3408,6 @@
     "isCustom": false
   },
   {
-    "name": "Donovia - Millinar Route",
-    "planets": [
-      "Donovia",
-      "Millinar"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Goorla - Tsoss Beacon Route",
     "planets": [
       "Goorla",
@@ -3420,14 +3420,6 @@
     "planets": [
       "Thebeon",
       "Zenox Cluster"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Gallinore - Nazzri Route",
-    "planets": [
-      "Gallinore",
-      "Nazzri"
     ],
     "isCustom": false
   },
@@ -3496,6 +3488,14 @@
     "isCustom": false
   },
   {
+    "name": "Ambria - Porus Vida Route",
+    "planets": [
+      "Ambria",
+      "Porus Vida"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Bresnia - Krant Route",
     "planets": [
       "Bresnia",
@@ -3548,6 +3548,14 @@
     "planets": [
       "D'rinba",
       "Ison"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Reboam - Valgauth Route",
+    "planets": [
+      "Reboam",
+      "Valgauth"
     ],
     "isCustom": false
   },
@@ -3608,6 +3616,14 @@
     "isCustom": false
   },
   {
+    "name": "Contruum - Sargon Route",
+    "planets": [
+      "Contruum",
+      "Sargon"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Bandomeer - Sorrus Route",
     "planets": [
       "Bandomeer",
@@ -3636,6 +3652,14 @@
     "planets": [
       "Sinsang",
       "Vykos"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Korev VII - Tinta Route",
+    "planets": [
+      "Korev VII",
+      "Tinta"
     ],
     "isCustom": false
   },
@@ -3808,6 +3832,14 @@
     "isCustom": false
   },
   {
+    "name": "Varonat - Zephry Route",
+    "planets": [
+      "Varonat",
+      "Zephry"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Ilos - Kleeva Route",
     "planets": [
       "Ilos",
@@ -3884,6 +3916,14 @@
     "planets": [
       "Dellalt",
       "Lianna"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Ambria - Maires Route",
+    "planets": [
+      "Ambria",
+      "Maires"
     ],
     "isCustom": false
   },
@@ -4160,14 +4200,6 @@
     "isCustom": false
   },
   {
-    "name": "Varonat - Zephry Route",
-    "planets": [
-      "Varonat",
-      "Zephry"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Chalacta - Durkteel Route",
     "planets": [
       "Chalacta",
@@ -4248,14 +4280,6 @@
     "isCustom": false
   },
   {
-    "name": "B-Foroon - Vactooine Route",
-    "planets": [
-      "B-Foroon",
-      "Vactooine"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Ession - Makem Te Route",
     "planets": [
       "Ession",
@@ -4284,6 +4308,14 @@
     "planets": [
       "Isde Naha",
       "Tinoon"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "B-Foroon - Vactooine Route",
+    "planets": [
+      "B-Foroon",
+      "Vactooine"
     ],
     "isCustom": false
   },
@@ -4344,6 +4376,14 @@
     "isCustom": false
   },
   {
+    "name": "Korev VII - Tumani Route",
+    "planets": [
+      "Korev VII",
+      "Tumani"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Erysthes - Media Route",
     "planets": [
       "Erysthes",
@@ -4372,22 +4412,6 @@
     "planets": [
       "Bothawui",
       "Ord Pardron"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Ord Ibanna - Veron Route",
-    "planets": [
-      "Ord Ibanna",
-      "Veron"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Carcel - Onderon Route",
-    "planets": [
-      "Carcel",
-      "Onderon"
     ],
     "isCustom": false
   },
@@ -4552,10 +4576,10 @@
     "isCustom": false
   },
   {
-    "name": "Kashyyyk - Reboam Route",
+    "name": "Donovia - Millinar Route",
     "planets": [
-      "Kashyyyk",
-      "Reboam"
+      "Donovia",
+      "Millinar"
     ],
     "isCustom": false
   },
@@ -4580,6 +4604,14 @@
     "planets": [
       "Cheku",
       "Kerkoidia"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Andalia - Lalmy'ash Route",
+    "planets": [
+      "Andalia",
+      "Lalmy'ash"
     ],
     "isCustom": false
   },
@@ -4768,6 +4800,22 @@
     "isCustom": false
   },
   {
+    "name": "Carcel - Onderon Route",
+    "planets": [
+      "Carcel",
+      "Onderon"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Kelrodo-Ai - Thull's Vault Route",
+    "planets": [
+      "Kelrodo-Ai",
+      "Thull's Vault"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Kelrodo-Ai - Mugaar Route",
     "planets": [
       "Kelrodo-Ai",
@@ -4792,6 +4840,14 @@
     "isCustom": false
   },
   {
+    "name": "Farstone - Tokmia Route",
+    "planets": [
+      "Farstone",
+      "Tokmia"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Arkania - Barlok Route",
     "planets": [
       "Arkania",
@@ -4812,14 +4868,6 @@
     "planets": [
       "Gala",
       "Trasse"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Contruum - Relephon Route",
-    "planets": [
-      "Contruum",
-      "Relephon"
     ],
     "isCustom": false
   },
@@ -4992,6 +5040,14 @@
     "isCustom": false
   },
   {
+    "name": "Rainboh - Selab Route",
+    "planets": [
+      "Rainboh",
+      "Selab"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Juvex - Little Talhovi Route",
     "planets": [
       "Juvex",
@@ -5128,6 +5184,14 @@
     "isCustom": false
   },
   {
+    "name": "Calfa - Terephon Route",
+    "planets": [
+      "Calfa",
+      "Terephon"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Poytta - Rorak Route",
     "planets": [
       "Poytta",
@@ -5232,6 +5296,14 @@
     "isCustom": false
   },
   {
+    "name": "Rasterous - Zalori Route",
+    "planets": [
+      "Rasterous",
+      "Zalori"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Hapes - Sermeria Route",
     "planets": [
       "Hapes",
@@ -5252,14 +5324,6 @@
     "planets": [
       "Manda",
       "Pii"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Gorse - Rainboh Route",
-    "planets": [
-      "Gorse",
-      "Rainboh"
     ],
     "isCustom": false
   },
@@ -5384,6 +5448,22 @@
     "isCustom": false
   },
   {
+    "name": "Kashyyyk - Terephon Route",
+    "planets": [
+      "Kashyyyk",
+      "Terephon"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Selenius - Tarsa Route",
+    "planets": [
+      "Selenius",
+      "Tarsa"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Tiss'sharl - Yutusk Route",
     "planets": [
       "Tiss'sharl",
@@ -5428,6 +5508,14 @@
     "planets": [
       "Barison",
       "Torque"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Roqoo Depot - Valgauth Route",
+    "planets": [
+      "Roqoo Depot",
+      "Valgauth"
     ],
     "isCustom": false
   },
@@ -5504,14 +5592,6 @@
     "isCustom": false
   },
   {
-    "name": "Rasterous - Selab Route",
-    "planets": [
-      "Rasterous",
-      "Selab"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Diyu - Kor Usilic Route",
     "planets": [
       "Diyu",
@@ -5548,6 +5628,14 @@
     "planets": [
       "Argovia",
       "Boranda"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Nara - Tanjay Route",
+    "planets": [
+      "Nara",
+      "Tanjay"
     ],
     "isCustom": false
   },
@@ -5728,14 +5816,6 @@
     "isCustom": false
   },
   {
-    "name": "Relephon - Rynmar Route",
-    "planets": [
-      "Relephon",
-      "Rynmar"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Allyuen - Kelrodo-Ai Route",
     "planets": [
       "Allyuen",
@@ -5848,14 +5928,6 @@
     "isCustom": false
   },
   {
-    "name": "Korev VII - Sivoria Route",
-    "planets": [
-      "Korev VII",
-      "Sivoria"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Kaon - Thanium Route",
     "planets": [
       "Kaon",
@@ -5868,14 +5940,6 @@
     "planets": [
       "Besero",
       "Glithnos"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Farstone - Tokmia Route",
-    "planets": [
-      "Farstone",
-      "Tokmia"
     ],
     "isCustom": false
   },
@@ -5904,18 +5968,18 @@
     "isCustom": false
   },
   {
-    "name": "Dxun - Wodan Route",
-    "planets": [
-      "Dxun",
-      "Wodan"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Ixtlar - Kiribi Route",
     "planets": [
       "Ixtlar",
       "Kiribi"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Illoud - Vergill Route",
+    "planets": [
+      "Illoud",
+      "Vergill"
     ],
     "isCustom": false
   },
@@ -5936,10 +6000,10 @@
     "isCustom": false
   },
   {
-    "name": "Reboam - Theselon Route",
+    "name": "Chryya - Echnos Route",
     "planets": [
-      "Reboam",
-      "Theselon"
+      "Chryya",
+      "Echnos"
     ],
     "isCustom": false
   },
@@ -6064,22 +6128,6 @@
     "isCustom": false
   },
   {
-    "name": "Stalsinek - Valgauth Route",
-    "planets": [
-      "Stalsinek",
-      "Valgauth"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Maires - Tumani Route",
-    "planets": [
-      "Maires",
-      "Tumani"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Endoraan - Scipio Route",
     "planets": [
       "Endoraan",
@@ -6152,10 +6200,26 @@
     "isCustom": false
   },
   {
+    "name": "Ket - Maires Route",
+    "planets": [
+      "Ket",
+      "Maires"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Mandalore - Null Route",
     "planets": [
       "Mandalore",
       "Null"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Cyimarra - Rindao Route",
+    "planets": [
+      "Cyimarra",
+      "Rindao"
     ],
     "isCustom": false
   },
@@ -6168,10 +6232,10 @@
     "isCustom": false
   },
   {
-    "name": "Cyimarra - Rindao Route",
+    "name": "Maires - Zadaria Route",
     "planets": [
-      "Cyimarra",
-      "Rindao"
+      "Maires",
+      "Zadaria"
     ],
     "isCustom": false
   },
@@ -6232,6 +6296,14 @@
     "isCustom": false
   },
   {
+    "name": "Chosper - Talcharaim Route",
+    "planets": [
+      "Chosper",
+      "Talcharaim"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Dennaskar - Pii Route",
     "planets": [
       "Dennaskar",
@@ -6264,18 +6336,18 @@
     "isCustom": false
   },
   {
-    "name": "Pizilis - Uyter Route",
+    "name": "Galvoni - Tanjay Route",
     "planets": [
-      "Pizilis",
-      "Uyter"
+      "Galvoni",
+      "Tanjay"
     ],
     "isCustom": false
   },
   {
-    "name": "Nara - Tanjay Route",
+    "name": "Pizilis - Uyter Route",
     "planets": [
-      "Nara",
-      "Tanjay"
+      "Pizilis",
+      "Uyter"
     ],
     "isCustom": false
   },
@@ -6440,34 +6512,10 @@
     "isCustom": false
   },
   {
-    "name": "Bator Bai - Usnia Route",
-    "planets": [
-      "Bator Bai",
-      "Usnia"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Xorth - Yulant Route",
     "planets": [
       "Xorth",
       "Yulant"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Phelope - Rynmar Route",
-    "planets": [
-      "Phelope",
-      "Rynmar"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "k'Farri - Nantuker Route",
-    "planets": [
-      "k'Farri",
-      "Nantuker"
     ],
     "isCustom": false
   },
@@ -6528,6 +6576,14 @@
     "isCustom": false
   },
   {
+    "name": "Relephon - Tinta Route",
+    "planets": [
+      "Relephon",
+      "Tinta"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Hestria - Tibrin Route",
     "planets": [
       "Hestria",
@@ -6584,14 +6640,6 @@
     "isCustom": false
   },
   {
-    "name": "Baldavia - Jendorn Route",
-    "planets": [
-      "Baldavia",
-      "Jendorn"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Kedorzha - Yhifar Route",
     "planets": [
       "Kedorzha",
@@ -6616,6 +6664,22 @@
     "isCustom": false
   },
   {
+    "name": "Ord Ibanna - Veron Route",
+    "planets": [
+      "Ord Ibanna",
+      "Veron"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Qina - UR-9353 Route",
+    "planets": [
+      "Qina",
+      "UR-9353"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Beltrix III - Vanik Route",
     "planets": [
       "Beltrix III",
@@ -6628,14 +6692,6 @@
     "planets": [
       "Indupar",
       "Phaegon_III"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Kashyyyk - Nantuker Route",
-    "planets": [
-      "Kashyyyk",
-      "Nantuker"
     ],
     "isCustom": false
   },
@@ -6700,14 +6756,6 @@
     "planets": [
       "Denarii Station",
       "Serenno"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Jodaka - Vergill Route",
-    "planets": [
-      "Jodaka",
-      "Vergill"
     ],
     "isCustom": false
   },
@@ -6816,14 +6864,6 @@
     "isCustom": false
   },
   {
-    "name": "Jodaka - Porus Vida Route",
-    "planets": [
-      "Jodaka",
-      "Porus Vida"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Edusa - Raydonia Route",
     "planets": [
       "Edusa",
@@ -6876,6 +6916,14 @@
     "planets": [
       "Drackmar",
       "Kiva"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Roqoo Depot - Togoria Route",
+    "planets": [
+      "Roqoo Depot",
+      "Togoria"
     ],
     "isCustom": false
   },
@@ -7016,26 +7064,10 @@
     "isCustom": false
   },
   {
-    "name": "Katarr - Tinta Route",
-    "planets": [
-      "Katarr",
-      "Tinta"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Lyran - Varristad Route",
     "planets": [
       "Lyran",
       "Varristad"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Roqoo Depot - Sennex Route",
-    "planets": [
-      "Roqoo Depot",
-      "Sennex"
     ],
     "isCustom": false
   },
@@ -7068,6 +7100,14 @@
     "planets": [
       "Marmoth",
       "Varvrona"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Ket - Thrakia Route",
+    "planets": [
+      "Ket",
+      "Thrakia"
     ],
     "isCustom": false
   },
@@ -7168,6 +7208,14 @@
     "isCustom": false
   },
   {
+    "name": "Rasterous - Vergill Route",
+    "planets": [
+      "Rasterous",
+      "Vergill"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Aquella - Kamur Route",
     "planets": [
       "Aquella",
@@ -7196,14 +7244,6 @@
     "planets": [
       "Adin",
       "Kroctar"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Kuna's Eye - UR-9353 Route",
-    "planets": [
-      "Kuna's Eye",
-      "UR-9353"
     ],
     "isCustom": false
   },
@@ -7252,14 +7292,6 @@
     "planets": [
       "Cirrus",
       "Lonnaw"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Archais - Sivoria Route",
-    "planets": [
-      "Archais",
-      "Sivoria"
     ],
     "isCustom": false
   },
@@ -7408,14 +7440,6 @@
     "isCustom": false
   },
   {
-    "name": "Tumani - Zadaria Route",
-    "planets": [
-      "Tumani",
-      "Zadaria"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Baummu - Trammis Route",
     "planets": [
       "Baummu",
@@ -7444,6 +7468,14 @@
     "planets": [
       "Denarii Station",
       "Kushibah"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Calfa - Sennex Route",
+    "planets": [
+      "Calfa",
+      "Sennex"
     ],
     "isCustom": false
   },
@@ -7624,14 +7656,6 @@
     "isCustom": false
   },
   {
-    "name": "Maya Kovel - Qina Route",
-    "planets": [
-      "Maya Kovel",
-      "Qina"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Grandine - Sarapin Route",
     "planets": [
       "Grandine",
@@ -7696,14 +7720,6 @@
     "isCustom": false
   },
   {
-    "name": "Atron - Velga Route",
-    "planets": [
-      "Atron",
-      "Velga"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Chalacta - Deysum Route",
     "planets": [
       "Chalacta",
@@ -7716,14 +7732,6 @@
     "planets": [
       "Anaxes",
       "Wakeelmui"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Lalmy'ash - Terephon Route",
-    "planets": [
-      "Lalmy'ash",
-      "Terephon"
     ],
     "isCustom": false
   },
@@ -7848,6 +7856,14 @@
     "isCustom": false
   },
   {
+    "name": "Mattri - Zalori Route",
+    "planets": [
+      "Mattri",
+      "Zalori"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "D'ian - Mytus Route",
     "planets": [
       "D'ian",
@@ -7860,6 +7876,14 @@
     "planets": [
       "Baraboo",
       "Hosnian Prime"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "k'Farri - Kashyyyk Route",
+    "planets": [
+      "k'Farri",
+      "Kashyyyk"
     ],
     "isCustom": false
   },
@@ -7896,10 +7920,10 @@
     "isCustom": false
   },
   {
-    "name": "Cheruba - Porus Vida Route",
+    "name": "Denebia - Usnia Route",
     "planets": [
-      "Cheruba",
-      "Porus Vida"
+      "Denebia",
+      "Usnia"
     ],
     "isCustom": false
   },
@@ -7908,14 +7932,6 @@
     "planets": [
       "Indu San",
       "Jeyell"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Daruvvia - Theselon Route",
-    "planets": [
-      "Daruvvia",
-      "Theselon"
     ],
     "isCustom": false
   },
@@ -7940,22 +7956,6 @@
     "planets": [
       "Bronsoon",
       "Krylon"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Berri - Porus Vida Route",
-    "planets": [
-      "Berri",
-      "Porus Vida"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Febrini - Zalori Route",
-    "planets": [
-      "Febrini",
-      "Zalori"
     ],
     "isCustom": false
   },
@@ -8064,6 +8064,14 @@
     "isCustom": false
   },
   {
+    "name": "Farnica - Orelon Route",
+    "planets": [
+      "Farnica",
+      "Orelon"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Anorelga - Rimcee Station Route",
     "planets": [
       "Anorelga",
@@ -8076,6 +8084,14 @@
     "planets": [
       "Koensayr",
       "Talasea"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Lovola - Ut Route",
+    "planets": [
+      "Lovola",
+      "Ut"
     ],
     "isCustom": false
   },
@@ -8176,14 +8192,6 @@
     "isCustom": false
   },
   {
-    "name": "Rbollea - Wodan Route",
-    "planets": [
-      "Rbollea",
-      "Wodan"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Quaensan Prime - Ryoone Route",
     "planets": [
       "Quaensan Prime",
@@ -8248,10 +8256,34 @@
     "isCustom": false
   },
   {
+    "name": "Loovria - Velga Route",
+    "planets": [
+      "Loovria",
+      "Velga"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Dolla - Velga Route",
+    "planets": [
+      "Dolla",
+      "Velga"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Cargamalis - Ozu Route",
     "planets": [
       "Cargamalis",
       "Ozu"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Daruvvia - Stalsinek Route",
+    "planets": [
+      "Daruvvia",
+      "Stalsinek"
     ],
     "isCustom": false
   },
@@ -8344,10 +8376,10 @@
     "isCustom": false
   },
   {
-    "name": "Archais - Sargon Route",
+    "name": "Christophsis - Vactooine Route",
     "planets": [
-      "Archais",
-      "Sargon"
+      "Christophsis",
+      "Vactooine"
     ],
     "isCustom": false
   },
@@ -8360,10 +8392,10 @@
     "isCustom": false
   },
   {
-    "name": "Christophsis - Vactooine Route",
+    "name": "Bator Bai - Usnia Route",
     "planets": [
-      "Christophsis",
-      "Vactooine"
+      "Bator Bai",
+      "Usnia"
     ],
     "isCustom": false
   },
@@ -8404,14 +8436,6 @@
     "planets": [
       "Kuna's Horn",
       "Zaddja"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Farnica - Modus Route",
-    "planets": [
-      "Farnica",
-      "Modus"
     ],
     "isCustom": false
   },
@@ -8596,6 +8620,14 @@
     "planets": [
       "Generis",
       "Kalki Nebula"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Farnica - Lalmy'ash Route",
+    "planets": [
+      "Farnica",
+      "Lalmy'ash"
     ],
     "isCustom": false
   },
@@ -8792,10 +8824,10 @@
     "isCustom": false
   },
   {
-    "name": "Mussubir - Rindao Route",
+    "name": "Relephon - Rynmar Route",
     "planets": [
-      "Mussubir",
-      "Rindao"
+      "Relephon",
+      "Rynmar"
     ],
     "isCustom": false
   },
@@ -8804,6 +8836,22 @@
     "planets": [
       "Axxila",
       "Krylon"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Mussubir - Rindao Route",
+    "planets": [
+      "Mussubir",
+      "Rindao"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Kirtarkin - Zhanox Route",
+    "planets": [
+      "Kirtarkin",
+      "Zhanox"
     ],
     "isCustom": false
   },
@@ -8832,18 +8880,18 @@
     "isCustom": false
   },
   {
-    "name": "Garnib - Velga Route",
-    "planets": [
-      "Garnib",
-      "Velga"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Bovo Yagen - Mek va Uil Route",
     "planets": [
       "Bovo Yagen",
       "Mek va Uil"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Sargon - Telkur Station Route",
+    "planets": [
+      "Sargon",
+      "Telkur Station"
     ],
     "isCustom": false
   },
@@ -9136,6 +9184,14 @@
     "isCustom": false
   },
   {
+    "name": "Lalmy'ash - Modus Route",
+    "planets": [
+      "Lalmy'ash",
+      "Modus"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Almania - Kanaver Route",
     "planets": [
       "Almania",
@@ -9148,6 +9204,14 @@
     "planets": [
       "Etti",
       "Tirsa"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Archais - Sivoria Route",
+    "planets": [
+      "Archais",
+      "Sivoria"
     ],
     "isCustom": false
   },
@@ -9328,14 +9392,6 @@
     "isCustom": false
   },
   {
-    "name": "Cheruba - Orelon Route",
-    "planets": [
-      "Cheruba",
-      "Orelon"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Adari - Korfo Route",
     "planets": [
       "Adari",
@@ -9364,14 +9420,6 @@
     "planets": [
       "Issor",
       "Ryloth"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Endor - UR-9353 Route",
-    "planets": [
-      "Endor",
-      "UR-9353"
     ],
     "isCustom": false
   },
@@ -9632,6 +9680,14 @@
     "isCustom": false
   },
   {
+    "name": "Rbollea - Relephon Route",
+    "planets": [
+      "Rbollea",
+      "Relephon"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Dachat - Metellos Route",
     "planets": [
       "Dachat",
@@ -9688,14 +9744,6 @@
     "isCustom": false
   },
   {
-    "name": "Loovria - Tyluun Route",
-    "planets": [
-      "Loovria",
-      "Tyluun"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Desevro - Jaminere Route",
     "planets": [
       "Desevro",
@@ -9728,26 +9776,10 @@
     "isCustom": false
   },
   {
-    "name": "Galvoni - Tanjay Route",
-    "planets": [
-      "Galvoni",
-      "Tanjay"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Bronsoon - Ladarra Route",
     "planets": [
       "Bronsoon",
       "Ladarra"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Andalia - Ut Route",
-    "planets": [
-      "Andalia",
-      "Ut"
     ],
     "isCustom": false
   },
@@ -10008,14 +10040,6 @@
     "isCustom": false
   },
   {
-    "name": "Manress - Phelope Route",
-    "planets": [
-      "Manress",
-      "Phelope"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Gaurick - Lafra Route",
     "planets": [
       "Gaurick",
@@ -10108,14 +10132,6 @@
     "planets": [
       "Kor Hestilic",
       "Mulatan"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Mattri - Selab Route",
-    "planets": [
-      "Mattri",
-      "Selab"
     ],
     "isCustom": false
   },
@@ -10360,14 +10376,6 @@
     "isCustom": false
   },
   {
-    "name": "Antiquity - Velga Route",
-    "planets": [
-      "Antiquity",
-      "Velga"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Pluthan - Skeebo Route",
     "planets": [
       "Pluthan",
@@ -10556,14 +10564,6 @@
     "planets": [
       "Alassa Major",
       "Arbra"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Javin - Zhanox Route",
-    "planets": [
-      "Javin",
-      "Zhanox"
     ],
     "isCustom": false
   },
@@ -10952,18 +10952,18 @@
     "isCustom": false
   },
   {
-    "name": "Houche - Vex Route",
+    "name": "Rbollea - Tumani Route",
     "planets": [
-      "Houche",
-      "Vex"
+      "Rbollea",
+      "Tumani"
     ],
     "isCustom": false
   },
   {
-    "name": "Selenius - Tarsa Route",
+    "name": "Houche - Vex Route",
     "planets": [
-      "Selenius",
-      "Tarsa"
+      "Houche",
+      "Vex"
     ],
     "isCustom": false
   },
@@ -11320,6 +11320,14 @@
     "isCustom": false
   },
   {
+    "name": "Archais - Katarr Route",
+    "planets": [
+      "Archais",
+      "Katarr"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Coonee - Kalinda Route",
     "planets": [
       "Coonee",
@@ -11344,6 +11352,14 @@
     "isCustom": false
   },
   {
+    "name": "Dreena - Phelope Route",
+    "planets": [
+      "Dreena",
+      "Phelope"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Cheruba - Lemmi Route",
     "planets": [
       "Cheruba",
@@ -11364,14 +11380,6 @@
     "planets": [
       "A-Foroon",
       "Tatooine"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Kirtarkin - Zhanox Route",
-    "planets": [
-      "Kirtarkin",
-      "Zhanox"
     ],
     "isCustom": false
   },
@@ -11480,14 +11488,6 @@
     "isCustom": false
   },
   {
-    "name": "Farnica - Talcharaim Route",
-    "planets": [
-      "Farnica",
-      "Talcharaim"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Ooo-temiuk - Vuzsa Route",
     "planets": [
       "Ooo-temiuk",
@@ -11500,14 +11500,6 @@
     "planets": [
       "Gulma",
       "Ventooine"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Baldavia - Stalsinek Route",
-    "planets": [
-      "Baldavia",
-      "Stalsinek"
     ],
     "isCustom": false
   },
@@ -11644,6 +11636,14 @@
     "planets": [
       "Fresia",
       "N'Zoth"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Antiquity - Tranthellix Route",
+    "planets": [
+      "Antiquity",
+      "Tranthellix"
     ],
     "isCustom": false
   },
@@ -11864,14 +11864,6 @@
     "isCustom": false
   },
   {
-    "name": "Charubah - Relephon Route",
-    "planets": [
-      "Charubah",
-      "Relephon"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Baraboo - Voktunma Route",
     "planets": [
       "Baraboo",
@@ -12040,22 +12032,6 @@
     "isCustom": false
   },
   {
-    "name": "Harterra - Ut Route",
-    "planets": [
-      "Harterra",
-      "Ut"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Ediorung - Roqoo Depot Route",
-    "planets": [
-      "Ediorung",
-      "Roqoo Depot"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Honoghr - Moralan Route",
     "planets": [
       "Honoghr",
@@ -12156,14 +12132,6 @@
     "planets": [
       "Taanab",
       "Thisspias"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Harterra - Illoud Route",
-    "planets": [
-      "Harterra",
-      "Illoud"
     ],
     "isCustom": false
   },
@@ -12576,14 +12544,6 @@
     "isCustom": false
   },
   {
-    "name": "Dxun - Lovola Route",
-    "planets": [
-      "Dxun",
-      "Lovola"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Bnar - Gabredor Route",
     "planets": [
       "Bnar",
@@ -12684,14 +12644,6 @@
     "planets": [
       "Abregado-rae",
       "Vaykaaris"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Loovria - Usnia Route",
-    "planets": [
-      "Loovria",
-      "Usnia"
     ],
     "isCustom": false
   },
@@ -12976,6 +12928,14 @@
     "isCustom": false
   },
   {
+    "name": "Kuna's Eye - UR-9353 Route",
+    "planets": [
+      "Kuna's Eye",
+      "UR-9353"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Reginard - Turkana Route",
     "planets": [
       "Reginard",
@@ -13232,14 +13192,6 @@
     "isCustom": false
   },
   {
-    "name": "Calfa - Terephon Route",
-    "planets": [
-      "Calfa",
-      "Terephon"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Hewett - Polus Route",
     "planets": [
       "Hewett",
@@ -13264,10 +13216,10 @@
     "isCustom": false
   },
   {
-    "name": "Denebia - Hestria Route",
+    "name": "Divora - Lalmy'ash Route",
     "planets": [
-      "Denebia",
-      "Hestria"
+      "Divora",
+      "Lalmy'ash"
     ],
     "isCustom": false
   },
@@ -13484,6 +13436,14 @@
     "planets": [
       "Kor Desilijic",
       "Sakiya"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Paramatan - Thermon Route",
+    "planets": [
+      "Paramatan",
+      "Thermon"
     ],
     "isCustom": false
   },
@@ -14264,14 +14224,6 @@
     "isCustom": false
   },
   {
-    "name": "Chosper - Relephon Route",
-    "planets": [
-      "Chosper",
-      "Relephon"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Petabys Station - Takodana Route",
     "planets": [
       "Petabys Station",
@@ -14308,14 +14260,6 @@
     "planets": [
       "Colonial Station Cam'co",
       "Cormit"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Corvanni IV - Rbollea Route",
-    "planets": [
-      "Corvanni IV",
-      "Rbollea"
     ],
     "isCustom": false
   },
@@ -15608,14 +15552,6 @@
     "isCustom": false
   },
   {
-    "name": "Thonner - UR-2650 Route",
-    "planets": [
-      "Thonner",
-      "UR-2650"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Corulag - Dankayo Route",
     "planets": [
       "Corulag",
@@ -15648,10 +15584,10 @@
     "isCustom": false
   },
   {
-    "name": "Naalol - Paramatan Route",
+    "name": "Thonner - UR-2650 Route",
     "planets": [
-      "Naalol",
-      "Paramatan"
+      "Thonner",
+      "UR-2650"
     ],
     "isCustom": false
   },
@@ -15668,6 +15604,14 @@
     "planets": [
       "Challon",
       "Chandrila"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Bator Bai - Loovria Route",
+    "planets": [
+      "Bator Bai",
+      "Loovria"
     ],
     "isCustom": false
   },
@@ -15792,6 +15736,14 @@
     "isCustom": false
   },
   {
+    "name": "Abbaji - UR-2650 Route",
+    "planets": [
+      "Abbaji",
+      "UR-2650"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Pygorix - Vallusk Cluster Route",
     "planets": [
       "Pygorix",
@@ -15868,14 +15820,6 @@
     "planets": [
       "Mondress",
       "Ord Varee"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Abbaji - UR-2650 Route",
-    "planets": [
-      "Abbaji",
-      "UR-2650"
     ],
     "isCustom": false
   },
@@ -16816,18 +16760,18 @@
     "isCustom": false
   },
   {
-    "name": "Fabrin - Gyndine Route",
+    "name": "Seline - Zeffo Route",
     "planets": [
-      "Fabrin",
-      "Gyndine"
+      "Seline",
+      "Zeffo"
     ],
     "isCustom": false
   },
   {
-    "name": "Relatta - Rynmar Route",
+    "name": "Fabrin - Gyndine Route",
     "planets": [
-      "Relatta",
-      "Rynmar"
+      "Fabrin",
+      "Gyndine"
     ],
     "isCustom": false
   },
@@ -18440,6 +18384,14 @@
     "isCustom": false
   },
   {
+    "name": "Relatta - Relephon Route",
+    "planets": [
+      "Relatta",
+      "Relephon"
+    ],
+    "isCustom": false
+  },
+  {
     "name": "Bosthirda - Tenara Route",
     "planets": [
       "Bosthirda",
@@ -19144,18 +19096,18 @@
     "isCustom": false
   },
   {
-    "name": "Shuldene - Tokmia Route",
-    "planets": [
-      "Shuldene",
-      "Tokmia"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Enarc - Sanbra Route",
     "planets": [
       "Enarc",
       "Sanbra"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Shuldene - Tokmia Route",
+    "planets": [
+      "Shuldene",
+      "Tokmia"
     ],
     "isCustom": false
   },
@@ -19424,14 +19376,6 @@
     "isCustom": false
   },
   {
-    "name": "Seline - Trassitan Route",
-    "planets": [
-      "Seline",
-      "Trassitan"
-    ],
-    "isCustom": false
-  },
-  {
     "name": "Atravis - Tosste Route",
     "planets": [
       "Atravis",
@@ -19492,6 +19436,14 @@
     "planets": [
       "Abridon",
       "Lutrillia"
+    ],
+    "isCustom": false
+  },
+  {
+    "name": "Plooma - Zeffo Route",
+    "planets": [
+      "Plooma",
+      "Zeffo"
     ],
     "isCustom": false
   },
@@ -19732,14 +19684,6 @@
     "planets": [
       "Betha",
       "Soullex"
-    ],
-    "isCustom": false
-  },
-  {
-    "name": "Plooma - Seline Route",
-    "planets": [
-      "Plooma",
-      "Seline"
     ],
     "isCustom": false
   },
