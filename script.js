@@ -1,444 +1,1077 @@
-:root {
-  --bg: #0d1117;
-  --panel: #161b22;
-  --text: #c9d1d9;
-  --accent: #58a6ff;
-  --grid-line: #30363d;
-  --planet: #3fb950;
-  --route: #f39c12;
-  --building: #2ea043;
-  --custom-lane: #bc13fe;
+const letters = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U'];
+const letterToNum = char => letters.indexOf(char);
+
+let planets = [];
+let hyperlanes = [];
+let lastRoutePath = null;
+let currentHoveredSector = null;
+
+let isClickPlotMode = false;
+let currentBuildingSequence = [];
+let routeSequence = [];
+
+let scale = 1;
+const minScale = 1;
+const maxScale = 4;
+let panX = 0;
+let panY = 0;
+let isDragging = false;
+let startX = 0, startY = 0;
+
+// --- DRAG TRACKING VARIABLES ---
+let dragStartX = 0, dragStartY = 0;
+let hasDragged = false; 
+
+// --- CACHE VARIABLES ---
+let offsetCache = {};
+let cachedSegmentCounts = {};
+let visualCentersCache = {};
+
+async function init() {
+  const xSelect = document.getElementById('p-x');
+  letters.forEach(l => xSelect.innerHTML += `<option value="${l}">Col ${l}</option>`);
+
+  const ySelect = document.getElementById('p-y');
+  for(let i=1; i<=21; i++) {
+    ySelect.innerHTML += `<option value="${i}">Row ${i}</option>`;
+  }
+
+  buildGrid();
+  setupZoomAndPan();
+  setupCanvasInteraction();
+
+  await loadPlanetsData();
+  await loadHyperlanesData();
+
+  refreshMapData();
+  setupAutocomplete('route-waypoint-input', 'waypoint-suggestions', addWaypoint);
+
+  window.addEventListener('resize', () => {
+    drawCanvas();
+  });
 }
 
-body {
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: 'Courier New', Courier, monospace;
-  margin: 0;
-  padding: 20px;
-  display: flex;
-  gap: 20px;
-  height: 100vh;
-  box-sizing: border-box;
+function toggleLogSystem() { document.getElementById('log-system-group').classList.toggle('expanded'); }
+function togglePlotHyperlane() { document.getElementById('plot-hyperlane-group').classList.toggle('expanded'); }
+function toggleMemoryCore() { document.getElementById('memory-core-group').classList.toggle('expanded'); }
+
+function toggleClickPlotMode(checkbox) {
+  isClickPlotMode = checkbox.checked;
+  const statusEl = document.getElementById('hp-status');
+  if (isClickPlotMode) {
+    statusEl.innerHTML = `Status: <span style="color: var(--building);">ACTIVE. Click planets on map to chain string.</span>`;
+    log("> CLICK-TO-PLOT STRING MODE ENGAGED. Click systems on the grid to chain hyperlane sequence.");
+  } else {
+    statusEl.innerText = "Status: Click-to-Plot Inactive";
+    log("> CLICK-TO-PLOT STRING MODE DISENGAGED.");
+  }
 }
 
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--grid-line);
-  border-radius: 6px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+function clearCurrentBuilding() {
+  currentBuildingSequence = [];
+  document.getElementById('hp-sequence').value = '';
+  drawCanvas();
+  log("> HYPERLANE STRING CLEARED.");
 }
 
-.controls {
-  flex: 1;
-  max-width: 380px;
-  overflow-y: auto;
+function addWaypoint(name) {
+  if (routeSequence.length > 0 && routeSequence[routeSequence.length - 1] === name) return;
+  routeSequence.push(name);
+  document.getElementById('route-sequence').value = routeSequence.join(', ');
+  log(`> WAYPOINT ADDED: <span style="color:#fff">${name}</span> (${routeSequence.length} stop${routeSequence.length > 1 ? 's' : ''} plotted)`);
+  drawCanvas();
 }
 
-.map-container {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-  align-items: center;
-  min-height: 0; /* Allows flex items to shrink below content size */
-  min-width: 0;  /* Prevents horizontal flex overflow */
+function clearRouteSequence() {
+  routeSequence = [];
+  document.getElementById('route-sequence').value = '';
+  lastRoutePath = null;
+  drawCanvas();
+  log("> ROUTE WAYPOINTS CLEARED.");
 }
 
-.map-container h2 {
-  flex-shrink: 0; /* Prevents the header from collapsing */
-  width: 100%;
+// Rebuilds caches whenever core data changes
+function refreshMapData() {
+  recalculateAllOffsets();
+  updateSegmentCounts();
+  drawGridOverlay();
+  drawCanvas();
 }
 
-.map-viewport {
-  aspect-ratio: 1 / 1;
-  height: 100%;
-  max-height: calc(100% - 50px); /* Reserve space for h2 title */
-  max-width: 100%;
-  width: auto;
-  margin: auto;
-  overflow: hidden;
-  position: relative;
-  cursor: grab;
-  display: flex;
-  border: 1px solid var(--grid-line);
-  box-sizing: border-box;
+// --- AUREBESH FONT TOGGLE ---
+function toggleAurebesh(checkbox) {
+  if (checkbox.checked) {
+    document.body.classList.add('aurebesh-mode');
+    log("> AUREBESH TRANSLATION ENGAGED.");
+  } else {
+    document.body.classList.remove('aurebesh-mode');
+    log("> STANDARD BASIC ENGAGED.");
+  }
 }
 
-.map-viewport:active {
-  cursor: grabbing;
+async function loadHyperlanesData() {
+  try {
+    const response = await fetch('hyperlane-routes.json');
+    if (!response.ok) throw new Error();
+    const data = await response.json();
+
+    hyperlanes = data.map(item => {
+      if (item.u && item.v && !item.planets) {
+        return { name: `${item.u}-${item.v} Route`, planets: [item.u, item.v], isCustom: true };
+      }
+      if (item.planets && item.isCustom === undefined) {
+        item.isCustom = true;
+      }
+      return item;
+    });
+    log("> ROUTE DATA LOADED FROM hyperlane-routes.json");
+  } catch (err) {
+    log("> NO LOCAL HYPERLANE DATA FOUND. NETWORK EMPTY.");
+    hyperlanes = [];
+  }
 }
 
-h2 {
-  margin-top: 0;
-  color: var(--accent);
-  border-bottom: 1px solid var(--grid-line);
-  padding-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  width: 100%;
+let redrawScheduled = false;
+function scheduleCanvasRedraw() {
+  if (redrawScheduled) return;
+  redrawScheduled = true;
+  requestAnimationFrame(() => {
+    redrawScheduled = false;
+    drawCanvas();
+  });
 }
 
-.control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 15px;
-  background: rgba(255, 255, 255, 0.02);
-  padding: 15px;
-  border: 1px solid rgba(48, 54, 61, 0.5);
-  border-radius: 4px;
-  position: relative;
+function setupZoomAndPan() {
+  const viewport = document.getElementById('map-viewport');
+
+  viewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const zoomIntensity = 0.15;
+    if (e.deltaY < 0) scale *= (1 + zoomIntensity);
+    else scale /= (1 + zoomIntensity);
+    updateTransform();
+    scheduleCanvasRedraw();
+  }, { passive: false });
+
+  viewport.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.planet-marker')) return;
+    isDragging = true;
+    hasDragged = false; // Reset drag flag
+    dragStartX = e.clientX; // Record exact start X
+    dragStartY = e.clientY; // Record exact start Y
+    startX = e.clientX - panX;
+    startY = e.clientY - panY;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    
+    // If the mouse moves more than 3px, classify as a deliberate drag
+    if (Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) > 3) {
+      hasDragged = true;
+    }
+
+    panX = e.clientX - startX;
+    panY = e.clientY - startY;
+    updateTransform();
+  });
+
+  window.addEventListener('mouseup', () => { isDragging = false; });
 }
 
-.collapsible-header {
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  user-select: none;
-  font-weight: bold;
-  font-size: 0.9em;
-  color: #8b949e;
-  margin: -15px -15px 0 -15px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.01);
-  border-radius: 4px 4px 0 0;
-  transition: background 0.2s, color 0.2s;
+function updateTransform() {
+  scale = Math.max(minScale, Math.min(maxScale, scale));
+
+  if (scale === 1) {
+    panX = 0; panY = 0;
+  } else {
+    const viewport = document.getElementById('map-viewport');
+    const maxPanX = (viewport.clientWidth * (scale - 1)) / 2;
+    const maxPanY = (viewport.clientHeight * (scale - 1)) / 2;
+
+    panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+    panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+  }
+
+  const grid = document.getElementById('map-grid');
+  grid.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
 }
 
-.collapsible-header:hover {
-  background: rgba(88, 166, 255, 0.05);
-  color: var(--accent);
+async function loadPlanetsData() {
+  try {
+    const response = await fetch('planets.json');
+    if (!response.ok) throw new Error();
+    planets = await response.json();
+    log("> NAV DATA LOADED FROM planets.json");
+  } catch (err) {
+    log("> LOADING CORE WORLDS DATABASE.");
+    planets = [
+      { name: 'Coruscant', x: 'K', y: 9, important: true },
+      { name: 'Corellia', x: 'I', y: 11, important: true },
+      { name: 'Alderaan', x: 'M', y: 7, important: true },
+      { name: 'Tatooine', x: 'R', y: 16, important: true },
+      { name: 'Balmorra', x: 'M', y: 10, important: true },
+      { name: 'Manaan', x: 'O', y: 11, important: true },
+      { name: 'Naboo', x: 'N', y: 14, important: true },
+      { name: 'Kashyyyk', x: 'L', y: 5, important: true },
+      { name: 'Eriadu', x: 'P', y: 13, important: true },
+      { name: 'Mandalore', x: 'G', y: 8, important: true },
+      { name: 'Fondor', x: 'J', y: 8, important: true },
+      { name: 'Kuat', x: 'L', y: 9, important: true }
+    ];
+  }
 }
 
-.collapsible-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out, margin-top 0.3s ease-out;
-  margin-top: 0;
+function saveCustomHyperlane() {
+  const name = document.getElementById('hp-name').value.trim();
+  const rawSequence = document.getElementById('hp-sequence').value.trim();
+
+  if (!name) return log("> ERROR: Hyperlane name required.");
+  if (!rawSequence) return log("> ERROR: Planet sequence required.");
+
+  const planetList = rawSequence.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  if (planetList.length < 2) return log("> ERROR: A hyperlane must connect at least 2 planets.");
+
+  for (const pName of planetList) {
+    const found = planets.find(p => p.name.toLowerCase() === pName.toLowerCase());
+    if (!found) return log(`> ERROR: Planet '${pName}' not found in database.`);
+  }
+
+  const existingLane = hyperlanes.find(l => l.name && l.name.toLowerCase() === name.toLowerCase());
+  if (existingLane) {
+    existingLane.planets = planetList;
+    existingLane.isCustom = true;
+    log(`> HYPERLANE UPDATED: ${name} (${planetList.length} systems)`);
+  } else {
+    hyperlanes.push({ name: name, planets: planetList, isCustom: true });
+    log(`> NEW HYPERLANE PLOTTED: ${name} (${planetList.length} systems)`);
+  }
+
+  document.getElementById('hp-name').value = '';
+  document.getElementById('hp-sequence').value = '';
+  currentBuildingSequence = [];
+  document.getElementById('hp-click-mode').checked = false;
+  isClickPlotMode = false;
+  document.getElementById('hp-status').innerText = 'Status: Click-to-Plot Inactive';
+  
+  updateSegmentCounts();
+  drawCanvas();
 }
 
-.control-group.expanded .collapsible-content {
-  max-height: 350px;
-  margin-top: 8px;
+async function generateHyperlaneGrid() {
+  if (planets.length < 2) return log("> ERROR: Need at least 2 systems logged to generate a network.");
+
+  log("> GENERATING CLEAN GALACTIC GRID...");
+  await new Promise(resolve => setTimeout(resolve, 10));
+
+  hyperlanes = hyperlanes.filter(lane => lane.isCustom);
+
+  const getCoord = p => {
+    const off = getPlanetOffset(p.name);
+    return { x: letterToNum(p.x) + (off.dx / 30), y: p.y + (off.dy / 30) };
+  };
+
+  const coords = new Map();
+  planets.forEach(p => coords.set(p.name, getCoord(p)));
+
+  const dist = (a, b) => {
+    const ca = coords.get(a.name);
+    const cb = coords.get(b.name);
+    return Math.hypot(ca.x - cb.x, ca.y - cb.y);
+  };
+
+  const MAX_HYPERLANE_DIST = 4.2;
+  const candidates = [];
+
+  for (let i = 0; i < planets.length; i++) {
+    for (let j = i + 1; j < planets.length; j++) {
+      const p1 = planets[i];
+      const p2 = planets[j];
+      const d12 = dist(p1, p2);
+      if (d12 > MAX_HYPERLANE_DIST) continue;
+
+      let isValid = true;
+      for (let k = 0; k < planets.length; k++) {
+        if (k === i || k === j) continue;
+        const p3 = planets[k];
+        if (Math.max(dist(p1, p3), dist(p2, p3)) < d12 - 0.001) {
+          isValid = false;
+          break;
+        }
+      }
+      if (isValid) candidates.push({ p1, p2, d: d12 });
+    }
+  }
+
+  candidates.sort((a, b) => a.d - b.d);
+
+  function orient(p, q, r) {
+    const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+    if (Math.abs(val) < 1e-6) return 0;
+    return val > 0 ? 1 : 2;
+  }
+
+  function segmentsCross(a1, a2, b1, b2) {
+    const ca1 = coords.get(a1.name), ca2 = coords.get(a2.name);
+    const cb1 = coords.get(b1.name), cb2 = coords.get(b2.name);
+
+    const o1 = orient(ca1, ca2, cb1), o2 = orient(ca1, ca2, cb2);
+    const o3 = orient(cb1, cb2, ca1), o4 = orient(cb1, cb2, ca2);
+    return (o1 !== o2 && o3 !== o4);
+  }
+
+  const activeEdges = [];
+  let addedCount = 0;
+
+  for (const cand of candidates) {
+    let crosses = false;
+    for (const edge of activeEdges) {
+      if (cand.p1.name === edge.p1.name || cand.p1.name === edge.p2.name ||
+          cand.p2.name === edge.p1.name || cand.p2.name === edge.p2.name) continue;
+          
+      if (segmentsCross(cand.p1, cand.p2, edge.p1, edge.p2)) {
+        crosses = true;
+        break;
+      }
+    }
+
+    if (!crosses) {
+      activeEdges.push(cand);
+      hyperlanes.push({
+        name: `${cand.p1.name} - ${cand.p2.name} Route`,
+        planets: [cand.p1.name, cand.p2.name],
+        isCustom: false
+      });
+      addedCount++;
+    }
+  }
+
+  updateSegmentCounts();
+  drawCanvas();
+  log(`> HYPERLANE GRID GENERATED: ${addedCount} clean links across ${planets.length} systems.<br>> Relative Neighborhood Topology: Crisp grid mesh, localized routes, zero line crossings.`);
 }
 
-.arrow {
-  transition: transform 0.3s ease;
-  font-size: 0.8em;
+function findShortestPath(startName, destName) {
+  const adjacency = {};
+  planets.forEach(p => adjacency[p.name] = []);
+
+  hyperlanes.forEach(lane => {
+    const routePlanets = lane.planets || [];
+    const speedMultiplier = lane.isCustom ? 2.5 : 1.0;
+
+    for (let i = 0; i < routePlanets.length - 1; i++) {
+      const u = routePlanets[i];
+      const v = routePlanets[i+1];
+      const p1 = planets.find(p => p.name === u);
+      const p2 = planets.find(p => p.name === v);
+
+      if (p1 && p2) {
+        const x1 = letterToNum(p1.x), y1 = p1.y;
+        const x2 = letterToNum(p2.x), y2 = p2.y;
+
+        const rawDist = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        const effectiveDist = rawDist / speedMultiplier;
+
+        if (!adjacency[u]) adjacency[u] = [];
+        if (!adjacency[v]) adjacency[v] = [];
+
+        adjacency[u].push({ node: v, weight: effectiveDist });
+        adjacency[v].push({ node: u, weight: effectiveDist });
+      }
+    }
+  });
+
+  const distances = {};
+  const previous = {};
+  const unvisited = new Set();
+
+  planets.forEach(p => {
+    distances[p.name] = Infinity;
+    previous[p.name] = null;
+    unvisited.add(p.name);
+  });
+
+  distances[startName] = 0;
+
+  while (unvisited.size > 0) {
+    let current = null;
+    let shortestDist = Infinity;
+
+    unvisited.forEach(node => {
+      if (distances[node] < shortestDist) {
+        shortestDist = distances[node];
+        current = node;
+      }
+    });
+
+    if (current === null || shortestDist === Infinity) break;
+    if (current === destName) break;
+
+    unvisited.delete(current);
+
+    if (adjacency[current]) {
+      adjacency[current].forEach(neighbor => {
+        if (unvisited.has(neighbor.node)) {
+          let alt = distances[current] + neighbor.weight;
+          if (alt < distances[neighbor.node]) {
+            distances[neighbor.node] = alt;
+            previous[neighbor.node] = current;
+          }
+        }
+      });
+    }
+  }
+
+  const path = [];
+  let curr = destName;
+  while (curr !== null) {
+    path.unshift(curr);
+    curr = previous[curr];
+  }
+
+  if (path.length === 1 && path[0] !== startName) return { path: [], cost: Infinity };
+  return { path, cost: distances[destName] };
 }
 
-.control-group.expanded .arrow {
-  transform: rotate(90deg);
+function buildGrid() {
+  const grid = document.getElementById('map-grid');
+  const canvas = document.getElementById('route-canvas');
+  
+  grid.innerHTML = '';
+  grid.appendChild(canvas);
+
+  let gridHTML = `<div class="grid-header"></div>`;
+  letters.forEach(l => {
+    gridHTML += `<div class="grid-header">${l}</div>`;
+  });
+
+  for(let y=1; y<=21; y++) {
+    gridHTML += `<div class="grid-header">${y}</div>`;
+    letters.forEach(x => {
+      gridHTML += `<div class="cell" id="cell-${x}-${y}"></div>`;
+    });
+  }
+  
+  grid.insertAdjacentHTML('beforeend', gridHTML); 
 }
 
-label {
-  font-weight: bold;
-  font-size: 0.9em;
-  color: #8b949e;
+function setupAutocomplete(inputId, listId, onSelect) {
+  const input = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+
+  const choosePlanet = (name) => {
+    if (onSelect) {
+      onSelect(name);
+      input.value = '';
+    } else {
+      input.value = name;
+    }
+    list.style.display = 'none';
+  };
+
+  input.addEventListener('input', () => {
+    const val = input.value.toLowerCase().trim();
+    list.innerHTML = '';
+    if (!val) {
+      list.style.display = 'none';
+      return;
+    }
+
+    const matches = planets.filter(p => p.name.toLowerCase().includes(val));
+    if (matches.length === 0) {
+      list.style.display = 'none';
+      return;
+    }
+
+    matches.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.innerHTML = `${p.name} <span style="color:#8b949e">(${p.x}-${p.y})</span>`;
+      item.onclick = () => choosePlanet(p.name);
+      list.appendChild(item);
+    });
+    list.style.display = 'block';
+  });
+
+  if (onSelect) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const val = input.value.trim();
+      if (!val) return;
+      const match = planets.find(p => p.name.toLowerCase() === val.toLowerCase());
+      if (match) choosePlanet(match.name);
+      else log(`> ERROR: System '${val}' not found in database.`);
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!input.contains(e.target) && !list.contains(e.target)) {
+      list.style.display = 'none';
+    }
+  });
 }
 
-input[type="text"], input[type="number"], select, button {
-  background: #0d1117;
-  color: var(--text);
-  border: 1px solid var(--grid-line);
-  padding: 10px;
-  border-radius: 4px;
-  font-family: inherit;
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash);
 }
 
-input:focus, select:focus {
-  outline: none;
-  border-color: var(--accent);
+function recalculateAllOffsets() {
+  offsetCache = {};
+  const sectors = {};
+  
+  planets.forEach(p => {
+    const key = `${p.x}-${p.y}`;
+    if (!sectors[key]) sectors[key] = [];
+    sectors[key].push(p);
+  });
+
+  for (const key in sectors) {
+    const peers = sectors[key].sort((a,b) => a.name.localeCompare(b.name));
+    
+    if (peers.length <= 1) {
+      const p = peers[0];
+      let angle = (hashCode(p.name + "_edge_angle") % 1000) / 1000 * Math.PI * 2;
+      let radius = 12 + ((hashCode(p.name + "_edge_rad") % 1000) / 1000) * 11;
+      offsetCache[p.name] = { dx: Math.cos(angle) * radius, dy: Math.sin(angle) * radius };
+      continue;
+    }
+
+    const maxOffset = 22;
+    const minDistance = 7;
+    const placedOffsets = [];
+
+    for (let i = 0; i < peers.length; i++) {
+      const peer = peers[i];
+      let angle = (hashCode(peer.name + "_angle") % 1000) / 1000 * Math.PI * 2;
+      let radius = 6 + (hashCode(peer.name + "_rad") % 1000) / 1000 * (maxOffset - 6);
+      let dx = Math.cos(angle) * radius;
+      let dy = Math.sin(angle) * radius;
+
+      let attempts = 0;
+      let collision = true;
+
+      while (collision && attempts < 30) {
+        collision = false;
+        for (const placed of placedOffsets) {
+          const dist = Math.hypot(dx - placed.dx, dy - placed.dy);
+          if (dist < minDistance) {
+            collision = true;
+            dx += (dx - placed.dx) * 0.4 || 0.6;
+            dy += (dy - placed.dy) * 0.4 || 0.6;
+          }
+        }
+        const currentRad = Math.hypot(dx, dy);
+        if (currentRad > maxOffset) {
+          dx = (dx / currentRad) * maxOffset;
+          dy = (dy / currentRad) * maxOffset;
+        }
+        attempts++;
+      }
+      placedOffsets.push({ dx, dy });
+      offsetCache[peer.name] = { dx, dy };
+    }
+  }
 }
 
-button {
-  background: var(--grid-line);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: bold;
-  text-transform: uppercase;
-  font-size: 0.85em;
+function getPlanetOffset(planetName) {
+  return offsetCache[planetName] || { dx: 0, dy: 0 };
 }
 
-button:hover {
-  background: var(--accent);
-  color: #000;
-  box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+function updateSegmentCounts() {
+  cachedSegmentCounts = {};
+  hyperlanes.forEach(lane => {
+    const routePlanets = lane.planets || [];
+    for (let i = 0; i < routePlanets.length - 1; i++) {
+      const u = routePlanets[i];
+      const v = routePlanets[i+1];
+      const key = (u < v) ? `${u}|${v}` : `${v}|${u}`;
+      cachedSegmentCounts[key] = (cachedSegmentCounts[key] || 0) + 1;
+    }
+  });
 }
 
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
-  margin-bottom: 6px;
+function getPlanetCenter(planetElementId, canvasElement) {
+  const planetElement = document.getElementById(planetElementId);
+  if (!planetElement) return null;
+
+  const dot = planetElement.querySelector('.planet-dot') || planetElement;
+
+  const dotRect = dot.getBoundingClientRect();
+  const canvasRect = canvasElement.getBoundingClientRect();
+
+  const x = (dotRect.left - canvasRect.left) + (dotRect.width / 2);
+  const y = (dotRect.top - canvasRect.top) + (dotRect.height / 2);
+
+  return { x, y };
 }
 
-.checkbox-row input {
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
+function drawGridOverlay() {
+  document.querySelectorAll('.planet-marker, .persistent-label').forEach(e => e.remove());
+
+  planets.forEach(p => {
+    const cell = document.getElementById(`cell-${p.x}-${p.y}`);
+    if(!cell) return;
+
+    const marker = document.createElement('div');
+    marker.className = 'planet-marker';
+    marker.dataset.planetName = p.name;
+
+    const offset = getPlanetOffset(p.name);
+    marker.style.marginLeft = `${offset.dx}px`;
+    marker.style.marginTop = `${offset.dy}px`;
+
+    if (p.important) {
+      const label = document.createElement('div');
+      label.className = `persistent-label sector-label-${p.x}-${p.y}`;
+      label.dataset.planetName = p.name;
+      label.innerText = p.name;
+      label.style.marginLeft = `${offset.dx}px`;
+      label.style.marginTop = `${offset.dy - 6}px`;
+      cell.appendChild(label);
+    }
+
+    cell.appendChild(marker);
+  });
 }
 
-.checkbox-row label {
-  cursor: pointer;
-  margin: 0;
+function handlePlanetClick(name) {
+  if (isClickPlotMode) {
+    currentBuildingSequence.push(name);
+    document.getElementById('hp-sequence').value = currentBuildingSequence.join(', ');
+    log(`> ADDED TO HYPERLANE STRING: <span style="color:#fff">${name}</span> (${currentBuildingSequence.length} systems)`);
+    drawCanvas();
+  } else {
+    addWaypoint(name);
+  }
 }
 
-.autocomplete-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
+function drawCanvas() {
+  const canvas = document.getElementById('route-canvas');
+  const ctx = canvas.getContext('2d');
+  const grid = document.getElementById('map-grid');
+
+  const baseWidth = grid.clientWidth - 40;
+  const baseHeight = grid.clientHeight - 40;
+  const dpr = window.devicePixelRatio || 1;
+
+  const MAX_CANVAS_DIM = 8192;
+  let renderScale = dpr * scale;
+  if (baseWidth * renderScale > MAX_CANVAS_DIM || baseHeight * renderScale > MAX_CANVAS_DIM) {
+    renderScale = Math.min(MAX_CANVAS_DIM / baseWidth, MAX_CANVAS_DIM / baseHeight);
+  }
+
+  const targetWidth = Math.round(baseWidth * renderScale);
+  const targetHeight = Math.round(baseHeight * renderScale);
+  if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+  }
+
+  ctx.save();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(renderScale, renderScale);
+
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.webkitImageSmoothingEnabled = true;
+  ctx.mozImageSmoothingEnabled = true;
+  ctx.msImageSmoothingEnabled = true;
+
+  visualCentersCache = {};
+
+  const canvasRect = canvas.getBoundingClientRect();
+  const screenCenterX = canvasRect.left + canvasRect.width / 2;
+  const screenCenterY = canvasRect.top + canvasRect.height / 2;
+
+  const markers = document.querySelectorAll('.planet-marker');
+  const markerMap = {};
+  markers.forEach(m => {
+    if (m.dataset.planetName) {
+      markerMap[m.dataset.planetName] = m;
+    }
+  });
+
+  const cellWidth = baseWidth / 19;
+  const cellHeight = baseHeight / 21;
+
+  planets.forEach(p => {
+    const marker = markerMap[p.name];
+    if (marker) {
+      const rect = marker.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      visualCentersCache[p.name] = {
+        x: Math.round((baseWidth / 2) + (cx - screenCenterX) / scale) + 0.5,
+                  y: Math.round((baseHeight / 2) + (cy - screenCenterY) / scale) + 0.5
+      };
+    } else {
+      const offset = getPlanetOffset(p.name);
+      visualCentersCache[p.name] = {
+        x: Math.round(letterToNum(p.x) * cellWidth + (cellWidth / 2) + offset.dx) + 0.5,
+                  y: Math.round((p.y - 1) * cellHeight + (cellHeight / 2) + offset.dy) + 0.5
+      };
+    }
+  });
+
+  hyperlanes.forEach(lane => {
+    const routePlanets = lane.planets || [];
+    const isCustom = lane.isCustom;
+    for (let i = 0; i < routePlanets.length - 1; i++) {
+      const u = routePlanets[i];
+      const v = routePlanets[i+1];
+      const start = visualCentersCache[u];
+      const end = visualCentersCache[v];
+
+      if (start && end) {
+        const key = (u < v) ? `${u}|${v}` : `${v}|${u}`;
+        const density = cachedSegmentCounts[key] || 1;
+
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+
+        if (isCustom) {
+          ctx.lineWidth = 2.0;
+          ctx.strokeStyle = 'rgba(188, 19, 254, 1.0)';
+        } else {
+          if (density > 1) {
+            ctx.lineWidth = 2.5 + (density * 0.5);
+            ctx.strokeStyle = 'rgba(88, 166, 255, 0.75)';
+          } else {
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(88, 166, 255, 0.5)';
+          }
+        }
+        ctx.stroke();
+      }
+    }
+  });
+
+  const drawPathOverlay = (sequence, color, lineDash, width) => {
+    if (!sequence || sequence.length < 2) return;
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.setLineDash(lineDash);
+
+    for (let i = 0; i < sequence.length - 1; i++) {
+      const start = visualCentersCache[sequence[i]];
+      const end = visualCentersCache[sequence[i+1]];
+      if (start && end) {
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.stroke();
+      }
+    }
+    ctx.setLineDash([]);
+  };
+
+  drawPathOverlay(currentBuildingSequence, 'rgba(46, 160, 67, 1.0)', [6, 4], 3.0);
+  drawPathOverlay(routeSequence, 'rgba(243, 156, 18, 0.9)', [4, 4], 3.0);
+  drawPathOverlay(lastRoutePath, 'rgba(243, 156, 18, 1.0)', [8, 6], 3.5);
+
+  ctx.restore();
 }
 
-.suggestions-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: var(--panel);
-  border: 1px solid var(--accent);
-  max-height: 140px;
-  overflow-y: auto;
-  z-index: 100;
-  display: none;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+function getUnscaledMousePos(e, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const grid = document.getElementById('map-grid');
+  const baseWidth = grid.clientWidth - 40;
+  const baseHeight = grid.clientHeight - 40;
+  const screenCenterX = rect.left + rect.width / 2;
+  const screenCenterY = rect.top + rect.height / 2;
+
+  return {
+    x: (baseWidth / 2) + (e.clientX - screenCenterX) / scale,
+    y: (baseHeight / 2) + (e.clientY - screenCenterY) / scale
+  };
 }
 
-.suggestion-item {
-  padding: 8px 10px;
-  cursor: pointer;
-  font-size: 0.85em;
-  border-bottom: 1px solid rgba(48, 54, 61, 0.3);
+function setupCanvasInteraction() {
+  const canvas = document.getElementById('route-canvas');
+  let isMouseProcessing = false;
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (isMouseProcessing) return;
+    isMouseProcessing = true;
+
+    requestAnimationFrame(() => {
+      processMouseMove(e, canvas);
+      isMouseProcessing = false;
+    });
+  });
+
+  canvas.addEventListener('click', (e) => {
+    if (hasDragged) return;
+
+    const mouse = getUnscaledMousePos(e, canvas);
+    for (const p of planets) {
+      const center = visualCentersCache[p.name];
+      if (center && Math.hypot(mouse.x - center.x, mouse.y - center.y) <= 3) {
+        handlePlanetClick(p.name);
+        return;
+      }
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => hideTooltip());
 }
 
-.suggestion-item:hover {
-  background: var(--accent);
-  color: #000;
+function processMouseMove(e, canvas) {
+  const mouse = getUnscaledMousePos(e, canvas);
+  const mouseX = mouse.x;
+  const mouseY = mouse.y;
+
+  let hoveredPlanet = null;
+  for (const p of planets) {
+    const center = visualCentersCache[p.name];
+    if (center && Math.hypot(mouseX - center.x, mouseY - center.y) <= 2) {
+      hoveredPlanet = p;
+      break;
+    }
+  }
+
+  if (hoveredPlanet) {
+    showPlanetTooltip(e, hoveredPlanet);
+    return;
+  }
+
+  let hoveredLane = null;
+  let minDistance = 8;
+
+  for (const lane of hyperlanes) {
+    const routePlanets = lane.planets || [];
+    for (let i = 0; i < routePlanets.length - 1; i++) {
+      const start = visualCentersCache[routePlanets[i]];
+      const end = visualCentersCache[routePlanets[i+1]];
+      if (!start || !end) continue;
+
+      const dist = distToSegment({x: mouseX, y: mouseY}, start, end);
+      if (dist < minDistance) {
+        hoveredLane = lane;
+        break;
+      }
+    }
+    if (hoveredLane) break;
+  }
+
+  if (hoveredLane) showLaneTooltip(e, hoveredLane);
+  else hideTooltip();
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 40px repeat(19, 1fr);
-  grid-template-rows: 40px repeat(21, 1fr);
-  flex: 1;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-  overflow: hidden;
-  transform-origin: center center;
-  will-change: transform;
+function distToSegment(p, p1, p2) {
+  const l2 = Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2);
+  if (l2 === 0) return Math.hypot(p.x - p1.x, p.y - p1.y);
+  let t = ((p.x - p1.x) * (p2.x - p1.x) + (p.y - p1.y) * (p2.y - p1.y)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (p1.x + t * (p2.x - p1.x)), p.y - (p1.y + t * (p2.y - p1.y)));
 }
 
-.grid-header {
-  background: #11151a;
-  text-align: center;
-  font-size: 0.8em;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid var(--grid-line);
-  border-right: 1px solid var(--grid-line);
-  color: #8b949e;
+function showLaneTooltip(e, lane) {
+  const tt = document.getElementById('tooltip');
+  const numSystems = lane.planets ? lane.planets.length : 0;
+  tt.innerHTML = `
+  <div class="tt-header" style="color: var(--custom-lane);">${lane.name || 'Hyperlane Segment'}</div>
+  <div style="color: #8b949e; font-size: 0.75em; margin-top: 4px;">Systems: ${numSystems}</div>
+  `;
+  tt.style.display = 'block';
+  moveTooltip(e);
 }
 
-.cell {
-  border-right: 1px dashed rgba(48, 54, 61, 0.3);
-  border-bottom: 1px dashed rgba(48, 54, 61, 0.3);
-  position: relative;
+function showPlanetTooltip(e, planet) {
+  currentHoveredSector = `${planet.x}-${planet.y}`;
+  document.querySelectorAll(`.sector-label-${currentHoveredSector}`).forEach(el => {
+    if (el.dataset.planetName !== planet.name) {
+      el.classList.add('hidden-label');
+    }
+  });
+
+  const tt = document.getElementById('tooltip');
+  let actionText = '[Click to add waypoint]';
+  let actionColor = 'var(--route)';
+
+  if (isClickPlotMode) {
+    actionText = '[Click to add to hyperlane string]';
+    actionColor = 'var(--building)';
+  }
+
+  tt.innerHTML = `
+  <div class="tt-header">${planet.name} ${planet.important ? '&#9733;' : ''}</div>
+  <div class="tt-item">Grid Sector: ${planet.x}-${planet.y}</div>
+  <div style="color: ${actionColor}; font-size: 0.75em; margin-top: 4px;">${actionText}</div>
+  `;
+  tt.style.display = 'block';
+  moveTooltip(e);
 }
 
-.planet-marker {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 4px;
-  height: 4px;
-  background: var(--planet);
-  border-radius: 50%;
-  box-shadow: 0 0 4px var(--planet);
-  pointer-events: none;
-  z-index: 10;
-  transition: transform 0.15s ease, background 0.15s;
+function moveTooltip(e) {
+  const tt = document.getElementById('tooltip');
+  const padding = 15;
+  let left = e.clientX + padding;
+  let top = e.clientY + padding;
+  const rect = tt.getBoundingClientRect();
+
+  if (left + rect.width > window.innerWidth - 10) left = e.clientX - rect.width - padding;
+  if (top + rect.height > window.innerHeight - 10) top = e.clientY - rect.height - padding;
+
+  tt.style.left = left + 'px';
+  tt.style.top = top + 'px';
 }
 
-.persistent-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -100%);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.7em;
-  text-transform: uppercase;
-  pointer-events: none;
-  z-index: 20;
-  text-shadow: 1px 1px 3px #000, 0 0 5px rgba(0, 0, 0, 0.8);
-  transition: opacity 0.2s ease;
-  white-space: nowrap;
+function hideTooltip() {
+  document.getElementById('tooltip').style.display = 'none';
+  if (currentHoveredSector) {
+    document.querySelectorAll(`.sector-label-${currentHoveredSector}`).forEach(el => {
+      el.classList.remove('hidden-label');
+    });
+    currentHoveredSector = null;
+  }
 }
 
-.hidden-label {
-  opacity: 0 !important;
+function addPlanet() {
+  const name = document.getElementById('p-name').value.trim();
+  const x = document.getElementById('p-x').value;
+  const y = parseInt(document.getElementById('p-y').value);
+  const isImportant = document.getElementById('p-important').checked;
+
+  if(!name) return log("> ERROR: Invalid planet designation.");
+
+  const existing = planets.find(p => p.name.toLowerCase() === name.toLowerCase());
+  if(existing) {
+    existing.x = x;
+    existing.y = y;
+    existing.important = isImportant;
+    log(`> DB UPDATE: ${name.toUpperCase()} moved to ${x}-${y}`);
+  } else {
+    planets.push({ name, x, y, important: isImportant });
+    log(`> NEW SYSTEM LOGGED: ${name.toUpperCase()} at ${x}-${y}`);
+  }
+
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-important').checked = false;
+  refreshMapData();
 }
 
-.output {
-  background: #000;
-  padding: 15px;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  min-height: 80px;
-  max-height: 160px;          /* Prevents the terminal from expanding infinitely */
-  overflow-y: auto;           /* Adds a scrollbar if text exceeds max-height */
-  overflow-wrap: break-word;  /* Forces long strings/paths to wrap within bounds */
-  word-break: break-word;
-  font-size: 0.9em;
-  line-height: 1.4;
-  box-shadow: inset 0 0 10px rgba(88, 166, 255, 0.1);
+function calculateRoute() {
+  if (routeSequence.length < 2) return log("> ERROR: Need at least 2 waypoints to calculate a route.");
+  const hyperClass = parseFloat(document.getElementById('h-class').value) || 1.0;
+  if (hyperlanes.length === 0) return log("> ERROR: No hyperlane network found.");
+
+  let fullPath = [];
+  let totalCost = 0;
+
+  for (let i = 0; i < routeSequence.length - 1; i++) {
+    const p1 = planets.find(p => p.name.toLowerCase() === routeSequence[i].toLowerCase());
+    const p2 = planets.find(p => p.name.toLowerCase() === routeSequence[i + 1].toLowerCase());
+
+    if (!p1 || !p2) return log("> ERROR: Unknown system in waypoint list.");
+    if (p1.name === p2.name) continue;
+
+    const { path: legPath, cost: legCost } = findShortestPath(p1.name, p2.name);
+
+    if (legCost === Infinity || legPath.length === 0) {
+      log(`> FATAL: No hyperlane path exists between <span style="color:#fff">${p1.name}</span> and <span style="color:#fff">${p2.name}</span>. Navigation aborted.`);
+      lastRoutePath = null;
+      drawCanvas();
+      return;
+    }
+
+    fullPath = fullPath.length === 0 ? fullPath.concat(legPath) : fullPath.concat(legPath.slice(1));
+    totalCost += legCost;
+  }
+
+  if (fullPath.length < 2) return log("> ERROR: Waypoints resolved to a single system - nowhere to jump to.");
+
+  const baseTimeHrs = 12;
+  const travelTimeHrs = totalCost * baseTimeHrs * hyperClass;
+  const d = Math.floor(travelTimeHrs / 24);
+  const h = Math.round(travelTimeHrs % 24);
+
+  const pathDisplay = routeSequence.length > 2
+  ? `<span style="color:#fff">${routeSequence[0]}</span> &rarr; ... &rarr; <span style="color:#fff">${routeSequence[routeSequence.length - 1]}</span> <span style="color:#8b949e">(${routeSequence.length} waypoints)</span>`
+  : `<span style="color:#fff">${routeSequence[0]}</span> &rarr; <span style="color:#fff">${routeSequence[1]}</span>`;
+
+  log(`> ROUTE PLOTTED:<br>`+
+  `> PATH: ${pathDisplay}<br>`+
+  `> TOTAL JUMP DISTANCE: ${totalCost.toFixed(2)} Sectors (${fullPath.length - 1} Jumps)<br>`+
+  `> HYPERDRIVE: Class ${hyperClass}<br>`+
+  `> EST. TRAVEL TIME: <span style="color:#fff">${d} Days, ${h} Hrs</span>`);
+
+  lastRoutePath = fullPath;
+  routeSequence = [];
+  document.getElementById('route-sequence').value = '';
+  drawCanvas();
 }
 
-#route-canvas {
-position: absolute;
-top: 40px;
-left: 40px;
-width: calc(100% - 40px);
-height: calc(100% - 40px);
-pointer-events: auto;
-z-index: 5; /* Lowered from 15 to 5 so hyperlanes render below planet markers (z-index: 10) and labels (z-index: 20) */
-cursor: default;
+function log(msg) { document.getElementById('output-log').innerHTML = msg; }
+
+function exportData() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(planets, null, 2));
+  const a = document.createElement('a');
+  a.href = dataStr;
+  a.download = 'planets.json';
+  a.click();
+  log("> PLANETS EXPORTED TO planets.json");
 }
 
-#tooltip {
-  position: fixed;
-  display: none;
-  background: rgba(22, 27, 34, 0.95);
-  border: 1px solid var(--accent);
-  color: var(--text);
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  pointer-events: none;
-  z-index: 1000;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(4px);
-  font-family: inherit;
-  white-space: nowrap;
+function importData(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(Array.isArray(data)) {
+        planets = data;
+        refreshMapData();
+        log("> planets.json LOADED SUCCESSFULLY");
+      }
+    } catch (err) { log("> ERROR: CORRUPTED DATA FILE"); }
+  };
+  reader.readAsText(file);
 }
 
-.tt-header {
-  color: var(--accent);
-  font-weight: bold;
-  margin-bottom: 4px;
-  border-bottom: 1px solid rgba(88, 166, 255, 0.3);
-  padding-bottom: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+function exportHyperlanes() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(hyperlanes, null, 2));
+  const a = document.createElement('a');
+  a.href = dataStr;
+  a.download = 'hyperlane-routes.json';
+  a.click();
+  log("> ROUTES EXPORTED TO hyperlane-routes.json");
 }
 
-.tt-item {
-  color: #ffffff;
-  margin-top: 3px;
+function importHyperlanes(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(Array.isArray(data)) {
+        hyperlanes = data.map(item => {
+          if (item.u && item.v && !item.planets) {
+            return { name: `${item.u}-${item.v} Route`, planets: [item.u, item.v], isCustom: true };
+          }
+          if (item.planets && item.isCustom === undefined) {
+            item.isCustom = !item.name.includes("Feeder Branch");
+          }
+          return item;
+        });
+        updateSegmentCounts();
+        drawCanvas();
+        log("> hyperlane-routes.json LOADED SUCCESSFULLY");
+      }
+    } catch (err) { log("> ERROR: CORRUPTED ROUTE DATA FILE"); }
+  };
+  reader.readAsText(file);
 }
 
-.flex-row {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-}
-
-.flex-row button {
-  flex: 1;
-}
-/* Load the included Aurebesh font */
-@font-face {
-  font-family: 'Aurebesh';
-  src: url('Aurek-Besh.ttf') format('truetype');
-}
-
-/* Class to toggle the font on the entire body */
-.aurebesh-mode {
-  font-family: 'Aurebesh', 'Courier New', Courier, monospace !important;
-}
-
-/* Ensure inputs and buttons inherit the toggled font */
-.aurebesh-mode input,
-.aurebesh-mode select,
-.aurebesh-mode button,
-.aurebesh-mode .persistent-label {
-  font-family: 'Aurebesh', 'Courier New', Courier, monospace !important;
-}
-
-/* The switch container */
-.astrogation-switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-}
-
-/* Hide default HTML checkbox */
-.astrogation-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The oval slider track */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #2a2a2a; /* Dark inactive track */
-  border: 1px solid #444;
-  transition: .3s ease-in-out;
-}
-
-/* The circular slider knob */
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: #888;
-  transition: .3s ease-in-out;
-}
-
-/* Engaged state - cyan glow */
-input:checked + .slider {
-  background-color: #00ffff; /* Neon cyan */
-  border-color: #00ffff;
-  box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
-}
-
-/* Move knob to the right when engaged */
-input:checked + .slider:before {
-  transform: translateX(26px);
-  background-color: #111; /* Dark knob contrasts with bright track */
-}
-
-/* Rounded corners for the oval shape */
-.slider.round {
-  border-radius: 24px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
+window.onload = init;
