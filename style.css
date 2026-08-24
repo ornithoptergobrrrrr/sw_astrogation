@@ -365,7 +365,7 @@ cursor: default;
 /* Load the included Aurebesh font */
 @font-face {
   font-family: 'Aurebesh';
-  src: url('Aurek-Besh.ttf') format('truetype');
+  src: url('AurekBesh-3wrL.ttf') format('truetype');
 }
 
 /* Class to toggle the font on the entire body */
