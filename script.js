@@ -98,6 +98,17 @@ function refreshMapData() {
   drawCanvas();
 }
 
+// --- AUREBESH FONT TOGGLE ---
+function toggleAurebesh(checkbox) {
+  if (checkbox.checked) {
+    document.body.classList.add('aurebesh-mode');
+    log("> AUREBESH TRANSLATION ENGAGED.");
+  } else {
+    document.body.classList.remove('aurebesh-mode');
+    log("> STANDARD BASIC ENGAGED.");
+  }
+}
+
 async function loadHyperlanesData() {
   try {
     const response = await fetch('hyperlane-routes.json');
