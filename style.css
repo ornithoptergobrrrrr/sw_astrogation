@@ -362,3 +362,83 @@ cursor: default;
 .flex-row button {
   flex: 1;
 }
+/* Load the included Aurebesh font */
+@font-face {
+  font-family: 'Aurebesh';
+  src: url('Aurek-Besh.ttf') format('truetype');
+}
+
+/* Class to toggle the font on the entire body */
+.aurebesh-mode {
+  font-family: 'Aurebesh', 'Courier New', Courier, monospace !important;
+}
+
+/* Ensure inputs and buttons inherit the toggled font */
+.aurebesh-mode input,
+.aurebesh-mode select,
+.aurebesh-mode button,
+.aurebesh-mode .persistent-label {
+  font-family: 'Aurebesh', 'Courier New', Courier, monospace !important;
+}
+
+/* The switch container */
+.astrogation-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+/* Hide default HTML checkbox */
+.astrogation-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The oval slider track */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2a2a2a; /* Dark inactive track */
+  border: 1px solid #444;
+  transition: .3s ease-in-out;
+}
+
+/* The circular slider knob */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #888;
+  transition: .3s ease-in-out;
+}
+
+/* Engaged state - cyan glow */
+input:checked + .slider {
+  background-color: #00ffff; /* Neon cyan */
+  border-color: #00ffff;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+/* Move knob to the right when engaged */
+input:checked + .slider:before {
+  transform: translateX(26px);
+  background-color: #111; /* Dark knob contrasts with bright track */
+}
+
+/* Rounded corners for the oval shape */
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
