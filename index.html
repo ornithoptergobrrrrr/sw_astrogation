@@ -6,7 +6,6 @@
   <title>Galactic Astrogation Computer</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Prevent status box squishing and allow panel scrolling */
     .panel.controls {
       overflow-y: auto !important;
     }
@@ -18,7 +17,7 @@
       overflow-y: visible !important;
       word-break: break-word;
       white-space: normal;
-      flex-shrink: 0 !important; /* Locks size so it never gets squished */
+      flex-shrink: 0 !important;
     }
   </style>
 </head>
@@ -28,14 +27,16 @@
 
   <div class="panel controls">
     <h2>Astrogation Systems</h2>
+    
     <!-- AUREBESH TOGGLE SLIDER -->
     <div class="toggle-row" style="margin-bottom: 15px; border-bottom: 1px solid var(--grid-line); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-    <span style="color: var(--accent);">Translate to Aurebesh</span>
-    <label class="astrogation-switch">
-      <input type="checkbox" id="font-toggle" onchange="toggleAurebesh(this)">
-      <span class="slider round"></span>
-  </label>
-</div>
+      <span style="color: var(--accent);">Translate to Aurebesh</span>
+      <label class="astrogation-switch">
+        <input type="checkbox" id="font-toggle" onchange="toggleAurebesh(this)">
+        <span class="slider round"></span>
+      </label>
+    </div>
+
     <div class="control-group" id="log-system-group">
       <div class="collapsible-header" onclick="toggleLogSystem()">
         <span>Log System / Add Planet</span>

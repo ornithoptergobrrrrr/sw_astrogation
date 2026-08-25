@@ -45,19 +45,19 @@ body {
   overflow: hidden;
   position: relative;
   align-items: center;
-  min-height: 0; /* Allows flex items to shrink below content size */
-  min-width: 0;  /* Prevents horizontal flex overflow */
+  min-height: 0;
+  min-width: 0;
 }
 
 .map-container h2 {
-  flex-shrink: 0; /* Prevents the header from collapsing */
+  flex-shrink: 0;
   width: 100%;
 }
 
 .map-viewport {
   aspect-ratio: 1 / 1;
   height: 100%;
-  max-height: calc(100% - 50px); /* Reserve space for h2 title */
+  max-height: calc(100% - 50px);
   max-width: 100%;
   width: auto;
   margin: auto;
@@ -301,9 +301,9 @@ button:hover {
   border: 1px solid var(--accent);
   color: var(--accent);
   min-height: 80px;
-  max-height: 160px;          /* Prevents the terminal from expanding infinitely */
-  overflow-y: auto;           /* Adds a scrollbar if text exceeds max-height */
-  overflow-wrap: break-word;  /* Forces long strings/paths to wrap within bounds */
+  max-height: 160px;
+  overflow-y: auto;
+  overflow-wrap: break-word;
   word-break: break-word;
   font-size: 0.9em;
   line-height: 1.4;
@@ -311,14 +311,14 @@ button:hover {
 }
 
 #route-canvas {
-position: absolute;
-top: 40px;
-left: 40px;
-width: calc(100% - 40px);
-height: calc(100% - 40px);
-pointer-events: auto;
-z-index: 5; /* Lowered from 15 to 5 so hyperlanes render below planet markers (z-index: 10) and labels (z-index: 20) */
-cursor: default;
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  width: calc(100% - 40px);
+  height: calc(100% - 40px);
+  pointer-events: auto;
+  z-index: 5;
+  cursor: default;
 }
 
 #tooltip {
@@ -362,24 +362,31 @@ cursor: default;
 .flex-row button {
   flex: 1;
 }
-/* Load the included besh font */
+
+/* Load the new Aurebesh font filename */
 @font-face {
   font-family: 'Aurebesh';
-  font-size: 8px;
   src: url('AurebeshAF-CanonTech.otf') format('opentype');
 }
 
-/* Class to toggle the font on the entire body */
+/* Class to toggle font and scale it down when Aurebesh mode is active */
 .aurebesh-mode {
   font-family: 'Aurebesh', 'Courier New', Courier, monospace !important;
+  font-size: 0.85em !important;
 }
 
-/* Ensure inputs and buttons inherit the toggled font */
+/* Ensure inputs, buttons, and labels scale nicely along with the font change */
 .aurebesh-mode input,
 .aurebesh-mode select,
 .aurebesh-mode button,
 .aurebesh-mode .persistent-label {
   font-family: 'Aurebesh', 'Courier New', Courier, monospace !important;
+}
+
+.aurebesh-mode input,
+.aurebesh-mode select,
+.aurebesh-mode button {
+  font-size: 0.8em !important;
 }
 
 /* The switch container */
@@ -390,14 +397,12 @@ cursor: default;
   height: 24px;
 }
 
-/* Hide default HTML checkbox */
 .astrogation-switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-/* The oval slider track */
 .slider {
   position: absolute;
   cursor: pointer;
@@ -405,12 +410,11 @@ cursor: default;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #2a2a2a; /* Dark inactive track */
+  background-color: #2a2a2a;
   border: 1px solid #444;
   transition: .3s ease-in-out;
 }
 
-/* The circular slider knob */
 .slider:before {
   position: absolute;
   content: "";
@@ -422,20 +426,17 @@ cursor: default;
   transition: .3s ease-in-out;
 }
 
-/* Engaged state - cyan glow */
 input:checked + .slider {
-  background-color: #00ffff; /* Neon cyan */
+  background-color: #00ffff;
   border-color: #00ffff;
   box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
 }
 
-/* Move knob to the right when engaged */
 input:checked + .slider:before {
   transform: translateX(26px);
-  background-color: #111; /* Dark knob contrasts with bright track */
+  background-color: #111;
 }
 
-/* Rounded corners for the oval shape */
 .slider.round {
   border-radius: 24px;
 }

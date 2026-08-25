@@ -18,11 +18,9 @@ let panY = 0;
 let isDragging = false;
 let startX = 0, startY = 0;
 
-// --- DRAG TRACKING VARIABLES ---
 let dragStartX = 0, dragStartY = 0;
 let hasDragged = false; 
 
-// --- CACHE VARIABLES ---
 let offsetCache = {};
 let cachedSegmentCounts = {};
 let visualCentersCache = {};
@@ -90,7 +88,6 @@ function clearRouteSequence() {
   log("> ROUTE WAYPOINTS CLEARED.");
 }
 
-// Rebuilds caches whenever core data changes
 function refreshMapData() {
   recalculateAllOffsets();
   updateSegmentCounts();
@@ -98,7 +95,6 @@ function refreshMapData() {
   drawCanvas();
 }
 
-// --- AUREBESH FONT TOGGLE ---
 function toggleAurebesh(checkbox) {
   if (checkbox.checked) {
     document.body.classList.add('aurebesh-mode');
@@ -156,21 +152,18 @@ function setupZoomAndPan() {
   viewport.addEventListener('mousedown', (e) => {
     if (e.target.closest('.planet-marker')) return;
     isDragging = true;
-    hasDragged = false; // Reset drag flag
-    dragStartX = e.clientX; // Record exact start X
-    dragStartY = e.clientY; // Record exact start Y
+    hasDragged = false;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
     startX = e.clientX - panX;
     startY = e.clientY - panY;
   });
 
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    
-    // If the mouse moves more than 3px, classify as a deliberate drag
     if (Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) > 3) {
       hasDragged = true;
     }
-
     panX = e.clientX - startX;
     panY = e.clientY - startY;
     updateTransform();
@@ -595,21 +588,6 @@ function updateSegmentCounts() {
   });
 }
 
-function getPlanetCenter(planetElementId, canvasElement) {
-  const planetElement = document.getElementById(planetElementId);
-  if (!planetElement) return null;
-
-  const dot = planetElement.querySelector('.planet-dot') || planetElement;
-
-  const dotRect = dot.getBoundingClientRect();
-  const canvasRect = canvasElement.getBoundingClientRect();
-
-  const x = (dotRect.left - canvasRect.left) + (dotRect.width / 2);
-  const y = (dotRect.top - canvasRect.top) + (dotRect.height / 2);
-
-  return { x, y };
-}
-
 function drawGridOverlay() {
   document.querySelectorAll('.planet-marker, .persistent-label').forEach(e => e.remove());
 
@@ -680,9 +658,6 @@ function drawCanvas() {
   ctx.lineJoin = 'round';
 
   ctx.imageSmoothingEnabled = true;
-  ctx.webkitImageSmoothingEnabled = true;
-  ctx.mozImageSmoothingEnabled = true;
-  ctx.msImageSmoothingEnabled = true;
 
   visualCentersCache = {};
 
@@ -710,13 +685,13 @@ function drawCanvas() {
 
       visualCentersCache[p.name] = {
         x: Math.round((baseWidth / 2) + (cx - screenCenterX) / scale) + 0.5,
-                  y: Math.round((baseHeight / 2) + (cy - screenCenterY) / scale) + 0.5
+        y: Math.round((baseHeight / 2) + (cy - screenCenterY) / scale) + 0.5
       };
     } else {
       const offset = getPlanetOffset(p.name);
       visualCentersCache[p.name] = {
         x: Math.round(letterToNum(p.x) * cellWidth + (cellWidth / 2) + offset.dx) + 0.5,
-                  y: Math.round((p.y - 1) * cellHeight + (cellHeight / 2) + offset.dy) + 0.5
+        y: Math.round((p.y - 1) * cellHeight + (cellHeight / 2) + offset.dy) + 0.5
       };
     }
   });
@@ -879,8 +854,8 @@ function showLaneTooltip(e, lane) {
   const tt = document.getElementById('tooltip');
   const numSystems = lane.planets ? lane.planets.length : 0;
   tt.innerHTML = `
-  <div class="tt-header" style="color: var(--custom-lane);">${lane.name || 'Hyperlane Segment'}</div>
-  <div style="color: #8b949e; font-size: 0.75em; margin-top: 4px;">Systems: ${numSystems}</div>
+    <div class="tt-header" style="color: var(--custom-lane);">${lane.name || 'Hyperlane Segment'}</div>
+    <div style="color: #8b949e; font-size: 0.75em; margin-top: 4px;">Systems: ${numSystems}</div>
   `;
   tt.style.display = 'block';
   moveTooltip(e);
@@ -904,9 +879,9 @@ function showPlanetTooltip(e, planet) {
   }
 
   tt.innerHTML = `
-  <div class="tt-header">${planet.name} ${planet.important ? '&#9733;' : ''}</div>
-  <div class="tt-item">Grid Sector: ${planet.x}-${planet.y}</div>
-  <div style="color: ${actionColor}; font-size: 0.75em; margin-top: 4px;">${actionText}</div>
+    <div class="tt-header">${planet.name} ${planet.important ? '&#9733;' : ''}</div>
+    <div class="tt-item">Grid Sector: ${planet.x}-${planet.y}</div>
+    <div style="color: ${actionColor}; font-size: 0.75em; margin-top: 4px;">${actionText}</div>
   `;
   tt.style.display = 'block';
   moveTooltip(e);
@@ -996,14 +971,14 @@ function calculateRoute() {
   const h = Math.round(travelTimeHrs % 24);
 
   const pathDisplay = routeSequence.length > 2
-  ? `<span style="color:#fff">${routeSequence[0]}</span> &rarr; ... &rarr; <span style="color:#fff">${routeSequence[routeSequence.length - 1]}</span> <span style="color:#8b949e">(${routeSequence.length} waypoints)</span>`
-  : `<span style="color:#fff">${routeSequence[0]}</span> &rarr; <span style="color:#fff">${routeSequence[1]}</span>`;
+    ? `<span style="color:#fff">${routeSequence[0]}</span> &rarr; ... &rarr; <span style="color:#fff">${routeSequence[routeSequence.length - 1]}</span> <span style="color:#8b949e">(${routeSequence.length} waypoints)</span>`
+    : `<span style="color:#fff">${routeSequence[0]}</span> &rarr; <span style="color:#fff">${routeSequence[1]}</span>`;
 
   log(`> ROUTE PLOTTED:<br>`+
-  `> PATH: ${pathDisplay}<br>`+
-  `> TOTAL JUMP DISTANCE: ${totalCost.toFixed(2)} Sectors (${fullPath.length - 1} Jumps)<br>`+
-  `> HYPERDRIVE: Class ${hyperClass}<br>`+
-  `> EST. TRAVEL TIME: <span style="color:#fff">${d} Days, ${h} Hrs</span>`);
+      `> PATH: ${pathDisplay}<br>`+
+      `> TOTAL JUMP DISTANCE: ${totalCost.toFixed(2)} Sectors (${fullPath.length - 1} Jumps)<br>`+
+      `> HYPERDRIVE: Class ${hyperClass}<br>`+
+      `> EST. TRAVEL TIME: <span style="color:#fff">${d} Days, ${h} Hrs</span>`);
 
   lastRoutePath = fullPath;
   routeSequence = [];
