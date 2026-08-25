@@ -365,7 +365,7 @@ cursor: default;
 /* Load the included Aurebesh font */
 @font-face {
   font-family: 'Aurebesh';
-  src: url('Auraboo.otf') format('opentype');
+  src: url('AurebeshAF-CanonTech.otf') format('opentype');
 }
 
 /* Class to toggle the font on the entire body */
