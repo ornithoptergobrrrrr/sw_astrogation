@@ -362,9 +362,10 @@ cursor: default;
 .flex-row button {
   flex: 1;
 }
-/* Load the included Aurebesh font */
+/* Load the included besh font */
 @font-face {
   font-family: 'Aurebesh';
+  font-size: 8px;
   src: url('AurebeshAF-CanonTech.otf') format('opentype');
 }
 
